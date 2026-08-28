@@ -35,7 +35,7 @@ This skill defines policy only. Use `skill://aku-scene` for scene and instance c
 ## Workflow position
 
 ```text
-rule://aku-asset-convention-rules (compact automatic policy)
+rule://aku-asset-convention-rules (automatic activation bridge)
   → skill://aku-asset-conventions (full naming and organization rules)
   → matching connected Unity MCP capability (other operations)
   → skill://aku-scene | skill://aku-prefab | skill://aku-animator (asset-specific operations)
@@ -44,7 +44,7 @@ rule://aku-asset-convention-rules (compact automatic policy)
 ## Cross-references
 
 - `skill://aku-code-conventions` — Unity C# naming, structure, fields, and reference wiring
-- `rule://aku-asset-convention-rules` — compact asset convention rulebook
+- `rule://aku-asset-convention-rules` — automatic activation bridge to this skill
 - `rule://aku-sc-rules` — Supercent-specific playable layout overlay
 - `skill://aku-scene` — scene and prefab-instance operations
 - `skill://aku-prefab` — prefab-asset operations
