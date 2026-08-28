@@ -47,9 +47,7 @@ Bind each capability to the Unity MCP tools already surfaced in your in-context 
 
 ## Report-only
 
-Findings + one-line fixes only. **Never edit code or assets.** Route C#/shader fixes to the installed
-C#-authoring skill (per `rule://aku-capability-routing`; native `Edit` fallback if none); Editor-state
-changes are applied separately through the connected Unity MCP, not in this read-only pass.
+Findings + one-line fixes only. **Never edit code or assets.** Fixes happen in a separate implementation pass; Editor-state changes are applied through the connected Unity MCP, not in this read-only pass.
 
 ## Output format
 
@@ -73,7 +71,7 @@ If clean: `Luna Review: No issues found.`
 
 ## Workflow position
 
-**Typically follows:** the focused Unity domain skill or installed C#-authoring skill (per `rule://aku-capability-routing`) used on a Luna playable.
-**Typically precedes:** the installed shipping/release skill (per `rule://aku-capability-routing`), or a Luna build (Cmd+E export).
+**Typically follows:** the focused Unity domain workflow or implementation pass used on a Luna playable.
+**Typically precedes:** shipping, release, or a Luna build (Cmd+E export).
 **Related:** `skill://aku-luna-build-check` (export build-settings tuning — complementary: this is *will-it-transpile*, that is *is-it-tuned*), `/skill:aku-code-review` (parent; this is its Lens 6 as a standalone entry), `/skill:aku-code-conventions`
 (convention lens). Run this review inline — the main agent walks the protocol directly.

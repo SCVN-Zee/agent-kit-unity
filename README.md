@@ -1,6 +1,6 @@
 # agentkit-unity
 
-> Standalone, MCP-agnostic Unity kit for AI coding agents: it teaches the agent **Unity conventions** and routes Editor operations to **whatever Unity MCP you have connected**, bound at runtime from the in-context tool list — no server name hard-coded, none auto-registered. Ships as an **Oh My Pi (OMP) project-scoped kit**: you drop it into a Unity repo's `.omp/` so it activates only there and stays silent everywhere else — no detection hooks needed. Ships Unity-domain skills and rules; non-Unity capabilities (C# authoring, planning, journaling, shipping) route to whatever compatible skills are installed, with native fallbacks otherwise. One concrete Unity MCP — IvanMurzak Unity-MCP — is documented purely as an illustrative reference in [`docs/MCP_CATALOG.md`](./docs/MCP_CATALOG.md).
+> Standalone, MCP-agnostic Unity kit for AI coding agents: it teaches Unity conventions and routes Editor operations to whatever Unity MCP is connected, bound at runtime from the in-context tool list—no server name hard-coded and none auto-registered. It ships as an Oh My Pi (OMP) project-scoped kit, so it activates only inside the Unity repo that contains it.
 
 **Status: v1.x-rc.** Validation gate before `1.0.0` final: the agent reaches for the **connected Unity MCP's** tool **unprompted** on a Unity-coded prompt in a real Unity project (whichever server is registered).
 
@@ -17,7 +17,7 @@ The kit answers that by **teaching the agent, not policing it** — it trusts a 
 3. **The other `rules/`** carry on-demand rulebook/guard rules (focused domain routing, conventions, asset guard).
 4. **`skills/`** encode focused scene, prefab, Animator, review, convention, and Odin workflows.
 
-Scope is Unity Editor/asset handling. C# script *authoring* routes to the installed C#-authoring skill (see `aku-capability-routing.md`; native `Edit` fallback when none). Luna playable-ad *builds* are run by the Luna pipeline. Luna *source/asset compatibility review* is in scope, via `/skill:aku-code-review-luna`.
+Scope is Unity Editor/asset handling. C# script authoring stays with the host agent runtime while this kit supplies the conventions. Luna playable-ad *builds* are run by the Luna pipeline. Luna *source/asset compatibility review* is in scope, via `/skill:aku-code-review-luna`.
 
 ---
 
@@ -39,13 +39,13 @@ Six are user-invocable as `/skill:aku-<name>`; `aku-code-conventions`, `aku-asse
 | `aku-code-review-luna` | Luna playable compatibility lens. Flags Bridge.NET forbidden-API hazards (async/await, reflection, struct-keyed dictionaries, `ScreenToWorldPoint`, …) and Luna asset risks that compile clean in the Editor but strip or no-op in the Luna build. Report-only. |
 | `aku-luna-build-check` | Luna export build-settings probe against `luna.json` — 6 auto-fixable gates, 4 report-only advisories. |
 
-**Domains without a focused skill** — bind directly to a matching capability from the connected Unity MCP; if none exists, use `reflection-method-call` or `script-execute`: physics · ui · render · test · build · first-class surgical per-property prefab apply. *(C# authoring → the installed C#-authoring skill per `aku-capability-routing.md`; Luna builds → Luna pipeline.)*
+**Domains without a focused skill** — bind directly to a matching capability from the connected Unity MCP; if none exists, use `reflection-method-call` or `script-execute`: physics · ui · render · test · build · first-class surgical per-property prefab apply. *(Luna builds → Luna pipeline.)*
 
 ### Agents — none
 
 The kit ships **no specialist agents**. Unity work runs directly in the main session (the conventions and routing rules are in context), and code review runs **inline** via the `aku-code-review` / `aku-code-review-luna` skills.
 
-### Rules — 7 base + 3 tier overlays
+### Rules — 5 base + 3 tier overlays
 
 Base rules ship into every Unity repo's `.omp/`; tier overlays are copied in only for matching repos (see Install). Each rule is bucketed by how OMP loads it — **sticky always-apply** (full body every prompt), **rulebook** (name+desc listed; body pulled via `rule://` on demand), or **TTSR** (fires once on a matching edit/command).
 
@@ -56,8 +56,6 @@ Base rules ship into every Unity repo's `.omp/`; tier overlays are copied in onl
 | `aku-asset-convention-rules.md` | Rulebook | On-demand for asset work |
 | `aku-mcp-policy.md` | Rulebook | Serialized-asset safety, focused domain dispatch, and live-capability/reflection fallback |
 | `aku-mcp-guard.md` | TTSR | On `edit`/`write` of a corruptible Unity asset — aborts, redirects to MCP |
-| `aku-capability-routing.md` | Rulebook | Consulted when routing a non-Unity capability |
-| `aku-parallel-rules.md` | Rulebook | Consulted before fan-out; Editor mutations always serialize |
 | `aku-sc-rules.md` *(Supercent tier)* | Always-apply | Supercent repos — `[Dev]` commit prefix + playable-ad layout |
 | `aku-luna-rules.md` *(Luna tier)* | Rulebook | Luna playable targets — the Odin editor-strip guard |
 | `aku-session-commit-rules.md` *(concurrent tier)* | TTSR | Concurrent-session repos — aborts blanket `git add -A` |

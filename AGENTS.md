@@ -19,7 +19,7 @@ Kit content cites **bare kebab capability ids in backticks** (`scene-open`, `scr
 
 ## Coexistence
 
-- The kit is **standalone**: it ships Unity handling only and routes non-Unity capabilities (cross-language scaffolding, planning, debugging, **C# script authoring**) at runtime via `aku-capability-routing.md`. When a sibling engineer/skill kit is installed it wins that routing; when absent, native fallbacks carry the work.
+- The kit is **standalone** and ships Unity handling only; non-Unity work stays with the host agent runtime.
 - It supplies Unity-only knowledge via `aku-*` namespaced files across skills and rules.
 - `scripts/ship-omp.cjs` copies the packaged `omp/` into a target repo's `.omp/`, records a checksum lock, and reconciles updates against user edits — it never touches paths the lock does not record.
 

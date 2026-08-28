@@ -44,10 +44,10 @@ function withSandbox(run) {
   finally { fs.rmSync(root, { recursive: true, force: true }); }
 }
 
-test('CLI scans the complete 9/7/3 metadata inventory', () => {
+test('CLI scans the complete 9/5/3 metadata inventory', () => {
   const run = spawnSync(process.execPath, [LINTER], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /19 surfaces: 9 skills, 7 base rules, 3 tier rules/);
+  assert.match(run.stdout, /17 surfaces: 9 skills, 5 base rules, 3 tier rules/);
 });
 
 test('inventory rejects missing files and uncontracted additions', () => withSandbox((root) => {

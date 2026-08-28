@@ -17,7 +17,3 @@ OMP rules cannot run detection code, so confirm the project's tier by reading th
 ## Server-agnostic MCP binding
 
 A Unity MCP commonly ships each tool twice — as an `mcp__<server>__<kebab>` tool and as an auto-generated bare-`<kebab>` skill. Kit content cites **bare kebab capability ids in backticks** (`scene-open`, `script-update-or-create`) as illustrative labels; bind each to whichever surface your connected server registers. Never reproduce a server prefix as a binding. Full detail: `rule://aku-mcp-policy`.
-
-## Non-Unity capabilities
-
-This kit ships Unity handling only. Route everything else — C# script authoring, planning, implementing, testing, generic review, journaling, shipping — to the best-matching **installed** capability at runtime; native tools carry the work when none is installed. Never synthesize an absent command. Detail: `rule://aku-capability-routing`.

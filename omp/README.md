@@ -13,8 +13,6 @@ omp/
     aku-asset-convention-rules.md  # rulebook (asset globs)
     aku-mcp-policy.md              # rulebook (full MCP routing policy)
     aku-mcp-guard.md              # TTSR — aborts a raw edit/write of a corruptible Unity asset
-    aku-capability-routing.md     # rulebook
-    aku-parallel-rules.md         # rulebook
   skills/aku-*/             # 9 focused Unity skills (SKILL.md + subfiles)
   tiers/                    # opt-in overlays — copy a tier's files in only for matching repos
     supercent/rules/aku-sc-rules.md          # alwaysApply — [Dev] commit prefix + layout
@@ -31,8 +29,6 @@ omp/
 | `aku-asset-convention-rules` | **Rulebook** | On-demand for asset work. |
 | `aku-mcp-policy` | **Rulebook** | Full policy, addressable via `rule://aku-mcp-policy`. |
 | `aku-mcp-guard` | **TTSR** | Fires on `edit`/`write` of `.prefab/.unity/.controller/.anim/.mat/.playable/.signal`; aborts the corrupting edit, redirects to MCP. |
-| `aku-capability-routing` | **Rulebook** | Consulted when routing a non-Unity capability. |
-| `aku-parallel-rules` | **Rulebook** | Consulted before fan-out. |
 | `aku-sc-rules` (Supercent) | **Always-apply** | `[Dev]` commit prefix is a hard every-commit requirement. |
 | `aku-luna-rules` (Luna) | **Rulebook** | On-demand when editing Odin-decorated C# on a playable target. |
 | `aku-session-commit-rules` (concurrent) | **TTSR** | Fires on `git add -A` / `git add .` / `git commit -a` in bash; aborts blanket staging. |

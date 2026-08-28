@@ -11,11 +11,9 @@ const SKILL_NAME = /^aku-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const CONTRACTS = {
   'rules/aku-mcp-policy.md': c('Use when', [/Editor state|serialized assets/i, /connected Unity MCP/i, /never raw file edits/i], { globs: ['.prefab', '.unity', '.controller', '.anim', '.mat'] }),
   'rules/aku-mcp-guard.md': c('Triggers when', [/corruptible Unity asset/i, /\.prefab/i, /connected Unity MCP/i, /TTSR/i], { scope: ['tool:edit', 'tool:write'], globs: ['.prefab', '.unity', '.controller', '.anim', '.mat', '.playable', '.signal'], condition: '[\\\\s\\\\S]', interruptMode: 'tool-only' }),
-  'rules/aku-capability-routing.md': c('Use when', [/C# authoring/i, /planning/i, /best installed skill/i, /native fallback/i, /never invent/i]),
   'rules/aku-engine-rules.md': c('Always applies', [/MonoBehaviour lifecycle/i, /mobile performance/i, /connected-Unity-MCP/i, /every prompt/i], { alwaysApply: 'true' }),
   'rules/aku-asset-convention-rules.md': c('Use when', [/naming/i, /importing|folder organization|importer intent/i, /hierarchy/i, /serialized mutation/i, /connected Unity MCP/i], { globs: ['**/Assets/**', '.prefab', '.unity', '.asset', '.mat'] }),
   'rules/aku-code-convention-rules.md': c('Use when', [/Unity C# policy/i, /generating, editing, or refactoring/i, /bounded-domain/i, /Asset names\/layout use skill:\/\/aku-asset-conventions/i, /Do not activate for report-only file, diff, commit, or PR review/i, /skill:\/\/aku-code-review owns it/i], { globs: '**/*.cs' }, [/^Use when[^.]*\breview(?:ing)?\b/i]),
-  'rules/aku-parallel-rules.md': c('Use when', [/subagents|parallel execution/i, /read-only/i, /serialize/i]),
   'tiers/supercent/rules/aku-sc-rules.md': c('Always applies', [/Supercent/i, /\[Dev\]/i, /Assets\/Supercent/i], { alwaysApply: 'true' }),
   'tiers/luna/rules/aku-luna-rules.md': c('Use when', [/Odin-decorated C#/i, /Luna/i, /editor-strip guard/i, /focused skills/i], { globs: '**/*.cs' }),
   'tiers/concurrent/rules/aku-session-commit-rules.md': c('Triggers when', [/blanket staging/i, /git add -A/i, /explicit-path staging/i], { scope: 'tool:bash', condition: ['git\\\\s+add\\\\s+-A', 'git\\\\s+add\\\\s+--all', 'git\\\\s+add\\\\s+\\\\.', 'git\\\\s+commit\\\\s+-'], interruptMode: 'tool-only' }),

@@ -38,13 +38,13 @@ Always close by saving the prefab → closing the stage.
 | Create a variant | call a method by reflection on `PrefabUtility.CreateVariant`, OR run an editor-side C# snippet invoking `PrefabUtility.CreateVariant` |
 | Unpack a prefab instance | call a method by reflection on `PrefabUtility.UnpackPrefabInstance`, OR run an editor-side C# snippet |
 
-When the gap matters (you make more than one reflection call), land a permanent helper by authoring a script in `Assets/Editor/` (out of this kit's scope → route per `rule://aku-capability-routing`).
+When the gap matters (you make more than one reflection call), land a permanent helper by authoring a script in `Assets/Editor/`.
 
 ## Refresh
 
 | Capability | When |
 | --- | --- |
-| Author a script | Lands a helper script (out of this kit's scope → route per `rule://aku-capability-routing`). |
+| Author a script | Lands a permanent helper script under `Assets/Editor/`. |
 | Refresh the asset DB | After external file changes (rarely needed — in-Editor changes through the tools don't require it). |
 
 ## Editor-side C# snippet return rule (Roslyn)

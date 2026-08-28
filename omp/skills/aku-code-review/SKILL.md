@@ -11,7 +11,7 @@ Game-dev code review for Unity. Replaces the SRE/web lenses of the installed gen
 
 ## Layering (do NOT duplicate)
 
-This skill is a Unity **lens pack** on top of generic code-review machinery. Load the installed generic code-review skill (per `rule://aku-capability-routing`) for that machinery; this skill adds the Unity lenses + MCP-native verification.
+Apply the host's normal code-review machinery; this skill adds the Unity lenses and MCP-native verification.
 
 | Concern | Owned by | This skill |
 | --- | --- | --- |
@@ -64,7 +64,7 @@ No profiler step — perf findings are reasoned statically (kept light by design
 
 ## Report-only
 
-Findings + fix examples only. **Never edit code/assets.** Route C# fixes to the installed C#-authoring skill (per `rule://aku-capability-routing`; native `Edit` fallback if none); Editor-state fixes (scene/prefab/animator) are applied separately through the connected Unity MCP, not in this read-only pass.
+Findings + fix examples only. **Never edit code/assets.** Fixes happen in a separate implementation pass; Editor-state fixes (scene/prefab/animator) are applied through the connected Unity MCP, not in this read-only pass.
 
 ## Output format
 
@@ -105,6 +105,6 @@ Flag a finding once, under its most specific lens. If a finding is also a conven
 
 ## Workflow position
 
-**Typically follows:** the focused Unity domain skill or installed C#-authoring skill (per `rule://aku-capability-routing`) used for the change.
-**Typically precedes:** the installed shipping/release skill (per `rule://aku-capability-routing`).
+**Typically follows:** the focused Unity domain workflow or implementation pass used for the change.
+**Typically precedes:** shipping or release.
 **Related:** the installed generic code-review skill (generic protocol it layers on), `/skill:aku-code-conventions` and `/skill:aku-asset-conventions` (convention lenses), `/skill:aku-code-review-luna` (Luna playable-compat sub-lens, auto-invoked on Luna projects). Run this review inline — the main agent walks the protocol directly.

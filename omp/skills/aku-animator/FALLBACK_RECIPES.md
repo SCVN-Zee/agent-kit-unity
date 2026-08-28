@@ -124,7 +124,7 @@ foreach (AnimatorControllerLayer layer in controller.layers)
 
 These snippets write the asset directly, so read the graph back afterwards — the mutation happened outside the batched animator edit and its `errors[]` reporting.
 
-If you find yourself running the same recipe more than twice, land a permanent editor helper under `Assets/Editor/` instead (authoring a `.cs` script is out of this kit's scope — route per `rule://aku-capability-routing`).
+If you find yourself running the same recipe more than twice, land a permanent editor helper under `Assets/Editor/` instead.
 
 ## When the editor-side C# snippet is unavailable
 

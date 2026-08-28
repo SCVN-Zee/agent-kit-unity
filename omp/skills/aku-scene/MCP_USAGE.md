@@ -59,7 +59,7 @@ Kept here: prefab-**instance** detection + the apply tiers. **Asset-lifecycle** 
 | Find a method by reflection | type / method filters | Locate an Editor API by name before invoking it. |
 | Call a method by reflection | type, method, args | Scalpel for ops with no typed capability. |
 | Run an editor-side C# snippet | C# snippet | One-off Roslyn-compiled execution; ends with `return <expr>;`. |
-| Author/edit a permanent editor helper | path, contents | Land a helper under `Assets/Editor/`. Script authoring is out of this kit's scope → route per `rule://aku-capability-routing`. |
+| Author/edit a permanent editor helper | path, contents | Land a helper under `Assets/Editor/`. |
 | Invoke a menu command by reflection (`EditorApplication.ExecuteMenuItem`) | menu path | e.g. `"GameObject/Align With View"`. |
 | Refresh the asset DB | — | Only after **external** file changes; in-Editor changes via the capabilities above don't need it. |
 
