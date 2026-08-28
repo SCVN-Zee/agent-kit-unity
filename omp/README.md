@@ -39,13 +39,18 @@ Use the installer — it copies the base set plus any auto-detected tier overlay
 into the repo's `.omp/` and records a checksum lock (`.omp/aku-lock.json`) so it
 can verify, update, and cleanly uninstall later:
 
+```sh
+INSTALLER=https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh
+run_agent_kit_installer() (
+  script=$(mktemp "${TMPDIR:-/tmp}/agent-kit-unity.XXXXXX") || exit
+  trap 'rm -f "$script"' 0 HUP INT TERM
+  curl -fsSL "$INSTALLER" -o "$script" || exit
+  sh "$script" "$@"
+)
+run_agent_kit_installer /path/to/unity-repo
 ```
-# from a global install (npm i -g agentkit-unity)
-aku-ship-omp /path/to/unity-repo
 
-# or from a checkout
-node scripts/ship-omp.cjs /path/to/unity-repo
-```
+The download-before-execute wrapper propagates curl failures instead of reporting a false success. The stable URL follows latest stable; to stay on beta, set `INSTALLER` to its exact tag URL. The downloaded bootstrap then verifies its archive's embedded SHA-256 before running the packaged installer.
 
 This writes `.omp/{AGENTS.md,rules/*,skills/**}` and, for a matching
 repo, the tier rule files below. The installer **auto-detects** tiers from the
@@ -64,11 +69,11 @@ Override auto-detection with `--tier a,b` / `--no-tier a,b`.
 
 | Command | Effect |
 |---------|--------|
-| `aku-ship-omp <repo>` | Install / refresh; keeps user-edited files (conflict) unless `--force`; byte-identical no-op when already in sync. |
-| `aku-ship-omp <repo> --check` | Report drift + available updates. Exit `0` in sync, `2` on drift/update (CI-friendly, matches the repo convention). |
-| `aku-ship-omp <repo> --update` | Apply upstream changes, recreate deleted managed files, prune departed tier files (only when the on-disk hash still matches the lock). |
-| `aku-ship-omp <repo> --uninstall` | Remove integrity-gated recorded paths + the lock. User files, drifted files, and legacy `orphaned: true` entries survive; add `--force` to explicitly accept a marker's hash for deletion. |
-| `aku-ship-omp <repo> --dry-run` | Print the plan; write nothing. |
+| `run_agent_kit_installer <repo>` | Install / refresh; keeps user-edited files (conflict) unless `--force`; byte-identical no-op when already in sync. |
+| `run_agent_kit_installer <repo> --check` | Report drift + available updates. Exit `0` in sync, `2` on drift/update. |
+| `run_agent_kit_installer <repo> --update` | Apply upstream changes, recreate deleted managed files, and integrity-gate departed paths. |
+| `run_agent_kit_installer <repo> --uninstall` | Remove integrity-gated recorded paths + the lock; preserve user or drifted files unless `--force`. |
+| `run_agent_kit_installer <repo> --dry-run` | Print the plan; write nothing. |
 
 The lock stores the kit version (from `package.json`) and a raw-byte SHA-256 per
 installed file. Drift is decided by content hash, never by version string. A
@@ -78,9 +83,7 @@ Optional per-repo overrides live in `.omp/aku-project.json`, read by `AGENTS.md`
 detection: `{"odin": true|false, "lunaPlayable": true, "concurrentSessions": true}`.
 The installer never writes `aku-project.json`.
 
-> Manual fallback (no Node): copy `omp/{AGENTS.md,rules,skills}` into
-> `<repo>/.omp/` and overlay the matching `tiers/<tier>/rules/*` by hand — but
-> then there is no lock, so `--check`/`--update` cannot track it.
+The supported consumer path is the checksum-verified release bootstrap above. It requires a POSIX `sh`, `curl`, `tar`, and Node 18+; source checkout and Make commands are maintainer workflows, not alternate installs.
 
 ## Notes
 

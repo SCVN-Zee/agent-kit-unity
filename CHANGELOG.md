@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project are documented in this file. Generated automatically by semantic-release on the main branch after 1.0.
+All notable changes to this project are documented in this file. Maintainers update it before pushing an exact stable or beta release tag.
 
 ## [Unreleased]
 
@@ -11,11 +11,15 @@ All notable changes to this project are documented in this file. Generated autom
 - **Asset-edit guard retired — the kit is now convention-only.** The PreToolUse asset guard, its cross-agent ship machinery (`ship-guard`, `build-guard-bundle`, the whole **Cursor** target), the portable Unity invariants, the editor-state HARD-GATEs, the Cinemachine "never install" landmine, and the Luna Odin editor-strip guard are all removed. The kit ships conventions + MCP file→tool routing knowledge only. `AKU_ASSET_GUARD`/`CKU_ASSET_GUARD` are inert. **Codex and Cursor users must run `node scripts/ship-guard.cjs --uninstall --target codex|cursor` before upgrading** (not self-healing); Claude Code self-heals on `make update`. See `MIGRATION.md` § "Guard retired".
 
 ### Added
+- **Tag-driven GitHub Releases.** Separate stable (`vX.Y.Z`) and beta (`vX.Y.Z-beta.N`) workflows run the full repository gate, build a draft release, verify its exact asset set, and publish only after all checks pass.
+- **Checksum-verified release bootstrap.** `scripts/build-release.cjs` emits exactly `install.sh`, `agent-kit-unity-v<version>.tgz`, and `SHA256SUMS`; the bootstrap verifies the archive before running the packaged OMP installer.
 - `aku-odin` skill — owns the Odin-instead-of-built-ins mandate (`[Header]`→`[Title]`, icon-first `[Button(SdfIconType.…)]`) and editor-tooling house style. `aku-code-conventions` keeps `[Required]` and bounded-domain policy and imperatively routes inspector work to the Odin skill.
 - `aku-odin` Inspector UX and advanced editor-tool guides, including the canonical 21-field/seven-tab locomotion example and a cached `OdinMenuEditorWindow` example.
 - `claude/rules/unity-supercent-rules.md` — new `## Commit prefix` section carrying the Supercent commit-message convention (`[Dev] <type>: <subject>`). Folded in from former `sc-git-rules.md`.
 
 ### Changed
+- **Independent distribution identity.** Package metadata and public release URLs now use `SCVN-Zee/agent-kit-unity`; the current package version is `0.1.0-beta.1`, and consumer install/update/check/uninstall guidance uses stable-latest or exact-beta GitHub bootstrap URLs instead of a global npm install.
+- **Release provenance gates.** Stable and beta workflows refuse to publish outside `SCVN-Zee/agent-kit-unity` and require the tagged commit to be reachable from `origin/main` before dependency installation, draft creation, or asset upload.
 - **OMP discovery metadata is now trigger-first and enforced.** All 9 skills, 5 base rules, and 3 tier rules state concrete activation intents, owned artifacts, exclusions, and sibling-surface boundaries in their indexed `description`. `lint:frontmatter` now validates the complete inventory, one-line scalar shape, 360-character ceiling, per-surface routing contracts, skill names, and always/glob/TTSR trigger semantics, with falsification tests for every invariant. Report-only Unity file, diff, commit, PR, or completed-feature review enters through `skill://aku-code-review`; it loads `skill://aku-code-conventions` as its convention lens, while direct convention discovery is reserved for policy lookup and author/edit/refactor work.
 - **Code convention rulebook is now an activation bridge.** The `**/*.cs` rule imperatively loads `skill://aku-code-conventions` instead of duplicating its policy. The code skill is the single authority, loads task-relevant subfiles, and routes inspector/Odin work to `skill://aku-odin`.
 - **Asset convention rulebook is now an activation bridge.** Asset-path globs retain automatic discovery, while the compact rule loads `skill://aku-asset-conventions` only for naming, organization, importer-intent, config-asset, and texture-suffix policy. Scene, prefab, Animator, material, and other serialized mutation remains with focused Unity skills or the connected Unity MCP.
@@ -26,6 +30,7 @@ All notable changes to this project are documented in this file. Generated autom
 - **`omp/RULES.md` relocated to `omp/rules/aku-engine-rules.md`** — the sticky always-apply engine + MCP + serialize invariants now ship as an `alwaysApply: true` rule inside `rules/` instead of a top-level `RULES.md` bucket (behavior preserved; renamed off the ambiguous `RULES` stem to the `aku-<domain>-rules` pattern). Existing installs migrate automatically on `ship-omp --update`: the old top-level `RULES.md` is pruned when unmodified (kept as a conflict if user-edited) and the relocated rule is installed. Installer payload (`omp-install-payload.js`), lock round-trip, `ship-omp`/safety tests, `lint:docs-counts` (now 7 base rules), and all docs/cross-refs (`README.md`, `omp/README.md`, `omp/AGENTS.md`, `AGENTS.md`, `Makefile`, `aku-conventions`) updated accordingly.
 
 ### Removed
+- **Competing npm publisher.** Semantic-release configuration, scripts, publish metadata, and dependencies are removed. GitHub tag workflows are the only release publishers; no npm package is published.
 - `claude/rules/sc-git-rules.md` — content merged into `unity-supercent-rules.md`; path added to `metadata.json.deletions[]` so installers clean up stale copies.
 - `claude/rules/unity-supercent-rules.md` — `## Kit substitutions` section dropped (`Supercent.Util.CoroutineUtil`, `Supercent.UIv2`, `BehaviourBase` substitutions no longer prescribed by the kit).
 - `claude/skills/cku-conventions/STRUCTURE.md` — stripped Supercent-kit annotations from the MonoBehaviour-discipline rules; removed the `BehaviourBase` bullet. Generic Unity rules retained.

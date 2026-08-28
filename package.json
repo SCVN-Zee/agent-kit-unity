@@ -1,6 +1,6 @@
 {
   "name": "agentkit-unity",
-  "version": "1.0.0-rc.1",
+  "version": "0.1.0-beta.1",
   "description": "MCP-agnostic Unity conventions + Editor-routing kit for AI coding agents, shipped as a project-scoped Oh My Pi kit. Teaches Unity conventions and routes Editor operations to whatever Unity MCP is connected (e.g. IvanMurzak Unity-MCP: 82 tools + 46 prompts); ships Unity-domain skills and rules plus the Luna playable-ads pipeline. Activates only in a repo's .omp/; silent elsewhere.",
   "scripts": {
     "test": "npm run test:scripts && node --test test/*.test.cjs",
@@ -9,15 +9,14 @@
     "lint:loc": "node scripts/lint-loc.cjs",
     "lint:frontmatter": "node scripts/lint-frontmatter.cjs",
     "lint:catalog": "node scripts/sync-mcp-catalog.cjs --check",
-    "lint:docs-counts": "node scripts/lint-docs-counts.cjs",
-    "semantic-release": "semantic-release"
+    "lint:docs-counts": "node scripts/lint-docs-counts.cjs"
   },
   "bin": {
     "aku-ship-omp": "./scripts/ship-omp.cjs"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/claudekit/claudekit-unity.git"
+    "url": "https://github.com/SCVN-Zee/agent-kit-unity.git"
   },
   "keywords": [
     "unity",
@@ -30,9 +29,9 @@
   "author": "Duy Nguyen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/claudekit/claudekit-unity/issues"
+    "url": "https://github.com/SCVN-Zee/agent-kit-unity/issues"
   },
-  "homepage": "https://github.com/claudekit/claudekit-unity#readme",
+  "homepage": "https://github.com/SCVN-Zee/agent-kit-unity#readme",
   "files": [
     "omp/",
     "scripts/",
@@ -41,21 +40,7 @@
     "CHANGELOG.md",
     "LICENSE"
   ],
-  "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^11.1.0",
-    "@semantic-release/exec": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^9.2.6",
-    "@semantic-release/npm": "^11.0.2",
-    "@semantic-release/release-notes-generator": "^12.1.0",
-    "conventional-changelog-conventionalcommits": "^7.0.2",
-    "semantic-release": "^22.0.12"
-  },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

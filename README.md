@@ -2,9 +2,9 @@
 
 > Standalone, MCP-agnostic Unity kit for AI coding agents: it teaches Unity conventions and routes Editor operations to whatever Unity MCP is connected, bound at runtime from the in-context tool list—no server name hard-coded and none auto-registered. It ships as an Oh My Pi (OMP) project-scoped kit, so it activates only inside the Unity repo that contains it.
 
-**Status: v1.x-rc.** Validation gate before `1.0.0` final: the agent reaches for the **connected Unity MCP's** tool **unprompted** on a Unity-coded prompt in a real Unity project (whichever server is registered).
+**Release channels:** stable tags (for example, `v0.1.0`) and beta tags (for example, `v0.1.0-beta.1`). There is no RC channel.
 
-> **Migration note.** The globally-installed Claude Code / Codex builds (SessionStart/UserPromptSubmit hooks, `~/.claude`, `~/.codex`) are **retired**. There is one build now: the project-scoped OMP kit under `omp/`, installed with `ship-omp`.
+> **Migration note.** The globally-installed Claude Code / Codex builds (SessionStart/UserPromptSubmit hooks, `~/.claude`, `~/.codex`) are **retired**. There is one build now: the project-scoped OMP kit under `omp/`, installed from a GitHub Release bootstrap.
 
 ## Why
 
@@ -88,15 +88,32 @@ The kit binds to **whatever Unity MCP you connect** — it registers none and ha
 ### 2. The kit — into a Unity repo's `.omp/`
 
 ```sh
-npm i -g agentkit-unity
-aku-ship-omp /path/to/unity-repo              # install base + auto-detected tiers, write the lock
-aku-ship-omp /path/to/unity-repo --check      # verify in sync (exit 2 on drift/available update)
-aku-ship-omp /path/to/unity-repo --update     # apply upstream changes; keep user edits unless --force
-aku-ship-omp /path/to/unity-repo --uninstall  # remove hash-matching trusted paths; orphan-marked bytes need --force
-aku-ship-omp /path/to/unity-repo --dry-run    # print the plan, write nothing
+INSTALLER=https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh
+run_agent_kit_installer() (
+  script=$(mktemp "${TMPDIR:-/tmp}/agent-kit-unity.XXXXXX") || exit
+  trap 'rm -f "$script"' 0 HUP INT TERM
+  curl -fsSL "$INSTALLER" -o "$script" || exit
+  sh "$script" "$@"
+)
+run_agent_kit_installer /path/to/unity-repo
 ```
 
-Iterating on the kit itself? Run `node scripts/ship-omp.cjs <repo>` from this checkout — same command, same result (the packaged `omp/` resolves from the module root either way).
+Downloading before execution makes a failed or partial bootstrap fetch fail closed. The stable URL follows the latest stable GitHub Release. For an explicit beta, keep using that beta's pinned URL for every operation:
+
+```sh
+TAG=v0.1.0-beta.1
+INSTALLER="https://github.com/SCVN-Zee/agent-kit-unity/releases/download/$TAG/install.sh"
+run_agent_kit_installer /path/to/unity-repo
+```
+
+Manage the installed kit through the same stable or pinned-beta installer URL:
+
+```sh
+run_agent_kit_installer /path/to/unity-repo --check
+run_agent_kit_installer /path/to/unity-repo --update
+run_agent_kit_installer /path/to/unity-repo --uninstall
+run_agent_kit_installer /path/to/unity-repo --dry-run
+```
 
 The installer writes `.omp/{AGENTS.md,rules/*,skills/**}` and **auto-detects** tier overlays from the target, recording the chosen set plus a raw-byte SHA-256 per file in `.omp/aku-lock.json`:
 
@@ -110,7 +127,8 @@ Override auto-detection with `--tier a,b` / `--no-tier a,b`. Drift is decided by
 
 - **An OMP-capable agent host** that discovers a repo's `.omp/` rules and skills.
 - **A Unity MCP server** connected, so each capability binds to a surfaced tool.
-- **Node 18+** for the installer (stdlib only — no runtime deps).
+- **A POSIX `sh`, `curl`, and `tar`** for the release bootstrap.
+- **Node 18+** for checksum verification and the installer (stdlib only — no runtime deps).
 
 ### Smoke test
 
@@ -168,6 +186,40 @@ make update TARGET_DIR=/path/to/unity-repo
 
 `TARGET_DIR` is a make **variable**, not a flag (default `.`).
 
+### Releases
+
+Releases are tag-driven GitHub assets only; nothing publishes to npm. The tag must exactly match both `package.json` and the top-level and root-package versions in `package-lock.json`. Workflows publish only in `SCVN-Zee/agent-kit-unity`, and the tagged commit must already be reachable from `origin/main`.
+
+**Beta `v0.1.0-beta.1`:**
+
+```sh
+npm version 0.1.0-beta.1 --no-git-tag-version --allow-same-version
+# Update CHANGELOG.md, then:
+make check
+git commit --only package.json package-lock.json CHANGELOG.md -m "chore(release): 0.1.0-beta.1"
+# Merge the release commit through the normal main-branch path, then:
+git switch main
+git pull --ff-only origin main
+git tag v0.1.0-beta.1
+git push origin v0.1.0-beta.1
+```
+
+**Stable `v0.1.0`:**
+
+```sh
+npm version 0.1.0 --no-git-tag-version
+# Update CHANGELOG.md, then:
+make check
+git commit --only package.json package-lock.json CHANGELOG.md -m "chore(release): 0.1.0"
+# Merge the release commit through the normal main-branch path, then:
+git switch main
+git pull --ff-only origin main
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The matching workflow reruns `make check`, builds and verifies exactly `install.sh`, `agent-kit-unity-v<version>.tgz`, and `SHA256SUMS`, then publishes. Stable moves GitHub's latest pointer; beta remains a prerelease.
+
 ### Lint gates
 
 | Gate | Enforces |
@@ -193,7 +245,7 @@ Full detail in [`AGENTS.md`](./AGENTS.md).
 
 ## Troubleshooting
 
-- **Rules/skills not discovered** — confirm the repo has a populated `.omp/` (`aku-ship-omp <repo>`), and that the nearest non-empty `.omp/` walking cwd→repo root is this one.
+- **Rules/skills not discovered** — confirm the repo has a populated `.omp/`, then rerun the same stable or pinned-beta bootstrap used to install it.
 - **`ship-omp --check` exits 2** — a managed file drifted from the lock, or an upstream update is available. Run `--update` (add `--force` to overwrite your own edits).
 - **`ship-omp` refuses** — it declines when `.omp/` is a symlink (it may redirect writes) or when the lock is corrupt/forward-version; `--force` rebuilds a corrupt lock.
 - **Agent ignores the rules** — confirm `.omp/rules/aku-mcp-policy.md` exists, then restart the session.

@@ -63,7 +63,7 @@ Makefile                   # OMP install/update/verify (make help | update | dry
 - **Version source is `package.json`.** Nothing reads or writes a `metadata.json`; that file and its stamp step are gone.
 - **File size**: each `.md` skill subfile and `.js`/`.cjs` source ≤200 LOC — **including `scripts/tests/`**, which `lint-loc` does not ignore. Split helpers into `scripts/lib/` as needed (`docs/MCP_CATALOG.md` may exceed; carve-out documented in `lint-loc.cjs`).
 - **Capability refs**: reference Unity capabilities by **bare kebab ids in backticks** as illustrative labels — the agent binds them to the connected server's tools at runtime. The kit hard-codes no server name and emits no `mcp__<server>__` prefix. `docs/MCP_CATALOG.md` stays byte-identical to a fresh regeneration, enforced by `lint:catalog`.
-- **No new runtime deps**: Node stdlib only for scripts. Dev deps (semantic-release plugins) are fine.
+- **No new runtime deps**: Node stdlib only for scripts. Release build and verification code also stays stdlib-only; this package has no npm publisher or semantic-release dependency.
 
 ## OMP kit conventions
 
@@ -73,14 +73,22 @@ Makefile                   # OMP install/update/verify (make help | update | dry
 
 ## Validation gate
 
-Whole-plan smoke (held at `-rc` until a Unity project is available): an agent in a real Unity project reaches for the **connected Unity MCP's** tool (either surface) **unprompted** on a Unity-coded prompt. Machine gates ship first: `lint:catalog`, `lint:loc`, `lint:frontmatter`, `lint:docs-counts`, and the full `scripts/tests/` + `test/` suites — all exit 0 (aggregated as `make check`).
+Machine gates are `lint:catalog`, `lint:loc`, `lint:frontmatter`, `lint:docs-counts`, and the full `scripts/tests/` + `test/` suites — all exit 0 through `make check`. Release tests additionally build the real archive, serve it over local HTTP, run the generated bootstrap, verify idempotency and conflict preservation, and prove checksum failure occurs before target mutation.
+
+## Releases
+
+- **Canonical repository:** `SCVN-Zee/agent-kit-unity`. ClaudeKit is historical inspiration only, never the package owner, release URL, or distribution identity.
+- **Exactly two channels:** stable tags `vX.Y.Z`; beta tags `vX.Y.Z-beta.N`. RC and generic prerelease tags are unsupported.
+- **Tag/version lockstep:** the pushed tag must equal `v` plus the exact version in both `package.json` and `package-lock.json`.
+- **One publisher:** `.github/workflows/release-stable.yml` and `release-beta.yml` are the only release publishers. They fail outside `SCVN-Zee/agent-kit-unity` or when the tagged commit is not reachable from `origin/main`, run `make check`, create a draft, upload exactly `install.sh`, `agent-kit-unity-v<version>.tgz`, and `SHA256SUMS`, verify the asset read-back, then publish. Stable becomes latest; beta remains a prerelease. Nothing publishes to npm.
+- **Build locally without releasing:** `node scripts/build-release.cjs v<package-version>`. Never create or push a tag while implementing or testing release machinery.
 
 ## Workflow
 
 When implementing changes inside this repo:
 - Read the active plan under `plans/` (the latest `<timestamp>-*/plan.md`) and the relevant `phase-XX-*.md` for context.
-- Update CHANGELOG.md via semantic-release commits (`feat:`, `fix:`, etc.). `package.json` is the version source of truth.
-- After any installer/rule/skill change, run `make check` (lint + test), then `make update TARGET_DIR=<unity-repo>` (or `node scripts/ship-omp.cjs <repo>`) to refresh a real install and confirm every path the lock names resolves.
+- Update `CHANGELOG.md` manually and use a conventional commit type (`feat:`, `fix:`, `docs:`, and so on). `package.json` is the version source of truth.
+- After any installer/rule/skill change, run `make check`, then `make update TARGET_DIR=<unity-repo>` (or `node scripts/ship-omp.cjs <repo>`) to refresh a real install and confirm every path the lock names resolves.
 - **`TARGET_DIR` is a make VARIABLE, not a flag** (default `.`).
 
 ## Updating the MCP Catalog
