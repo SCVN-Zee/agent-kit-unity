@@ -1,0 +1,9 @@
+{
+ "unity": {
+  "scenes": ["Assets/Game/Scenes/Main.unity", "Assets/Game/Scenes/Menu.unity"],
+  "disabledScenes": [],
+  "disableAntiAliasing": false,
+  "enableRealtimeShadows": false
+ },
+ "assets": { "rules": {} }
+}

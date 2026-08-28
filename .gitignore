@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# build/output
+/dist
+/build
+/out
+
+# testing
+/coverage
+.nyc_output
+
+# misc
+.DS_Store
+*.pem
+logs.txt
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+
+# lockfile is committed for reproducible CI installs (npm ci)
+
+# env files (opt-in to commit)
+.env*
+!.env.example
+
+# IDE
+.vscode/
+.idea/

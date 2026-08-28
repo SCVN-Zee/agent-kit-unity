@@ -1,0 +1,32 @@
+{
+  "categoryDescriptions": {
+    "animation": "Animator/AnimationClip CRUD (AI Animation extension).",
+    "animator": "Animator controller, layers, parameters (AI Animation extension).",
+    "assets": "AssetDatabase ops — find, get/modify data, prefab stage, material/shader, refresh.",
+    "console": "Editor console logs — get/clear with severity filter.",
+    "editor": "Editor application state (play mode) + selection get/set.",
+    "gameobject": "Hierarchy CRUD: create/destroy/duplicate/find/modify + component add/get/list/modify/destroy + set-parent.",
+    "object": "Generic UnityEngine.Object read/write — get-data + modify (diff / pathPatches / jsonPatch).",
+    "package": "UPM package add/remove/search/list. Add/remove deliver via requestId after domain reload.",
+    "particle": "ParticleSystem inspect/modify (AI ParticleSystem extension).",
+    "ping": "MCP health probe — call this first to confirm the server is reachable.",
+    "profiler": "Profiler.CaptureFrame + summaries.",
+    "reflection": "Reflection-first fallback: find type/method/field + invoke. Replaces ~160 dropped specialty tools.",
+    "scene": "Active scene CRUD — open/save/create/get-data + list-opened.",
+    "screenshot": "Scene view / Game view / Camera / Isolated screenshots.",
+    "script": "Script read + update-or-create (Roslyn-validated, waits compile via requestId) + delete + execute.",
+    "tests": "EditMode/PlayMode test runner. Aborts on dirty scenes — save first.",
+    "tool": "Discovery: unity-tool-list (live registry).",
+    "type": "Type introspection — JSON schema for an Object type."
+  },
+  "toolOverrides": {},
+  "categoryFootnotes": {
+    "scene": "**Dirty-scene gate**: `tests-run` aborts on unsaved scenes — save first.",
+    "editor": "**Compile gate**: `editor-application-set-state` (e.g. enter Play) throws if compile errors exist. Check `console-get-logs` (Error filter) first.",
+    "script": "**requestId pattern**: `script-update-or-create` / `script-delete` return immediately; final compile result arrives after domain reload (await it).",
+    "package": "**requestId pattern**: `package-add` / `package-remove` may trigger domain reload — await final result.",
+    "reflection": "**Reflection-first**: when no domain tool exists (dropped or extension uninstalled), use `reflection-method-find` → `reflection-method-call`. `type-get-json-schema` returns the shape. For one-off editor ops use `script-execute`; for permanent helpers use `script-update-or-create`."
+  },
+  "resources": [],
+  "assumedExtensions": ["unity-ai-animation", "unity-ai-particlesystem"]
+}

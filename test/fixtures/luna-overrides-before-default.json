@@ -1,0 +1,19 @@
+{
+ "unity": {
+  "scenes": ["Assets/Game/Scenes/Main.unity"],
+  "disabledScenes": [],
+  "disableAntiAliasing": false,
+  "enableRealtimeShadows": false
+ },
+ "assets": {
+  "rules": {
+   "meshes": {
+    "overrides": [
+     { "name": "Assets/Game/Meshes/Big.fbx", "halfPrecision": true, "useSimplification": false }
+    ],
+    "default": { "halfPrecision": true, "useSimplification": false, "simplificationPercentage": 30 }
+   },
+   "animations": { "default": { "halfPrecision": false, "stripCurves": false } }
+  }
+ }
+}
