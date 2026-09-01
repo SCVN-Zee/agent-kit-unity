@@ -1,6 +1,6 @@
 {
   "name": "agent-kit-unity",
-  "version": "0.1.1-beta.4",
+  "version": "0.1.1",
   "description": "MCP-agnostic Unity conventions + Editor-routing kit for AI coding agents, shipped as a project-scoped Oh My Pi kit. Teaches Unity conventions and routes Editor operations to whatever Unity MCP is connected (install any; most share the same core capabilities); ships Unity-domain skills and rules plus the Luna playable-ads pipeline. Activates only in a repo's .omp/; silent elsewhere.",
   "scripts": {
     "test": "npm run test:scripts && node --test test/*.test.cjs",

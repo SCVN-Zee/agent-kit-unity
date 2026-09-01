@@ -13,7 +13,7 @@ Requirements: macOS or Linux with POSIX `sh`, `curl`, `tar`, and **Node 18+** (c
 ### 1. Run this from your Unity repo root
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1-beta.4/install.sh | sh
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh
 ```
 
 What just happened:
@@ -28,10 +28,10 @@ What just happened:
 `--check` and `--update` compare your install against the release named in the URL — change the version in the URL to move to a newer release (in a kit checkout, `make bump VERSION=<next>` does the whole bump):
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1-beta.4/install.sh | sh -s -- --check      # drift report; exit 2 = out of sync
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1-beta.4/install.sh | sh -s -- --update     # apply: add / update / keep / delete
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1-beta.4/install.sh | sh -s -- --dry-run    # preview, writes nothing
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1-beta.4/install.sh | sh -s -- --uninstall  # removes hash-matching kit files only
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh -s -- --check      # drift report; exit 2 = out of sync
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh -s -- --update     # apply: add / update / keep / delete
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh -s -- --dry-run    # preview, writes nothing
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh -s -- --uninstall  # removes hash-matching kit files only
 ```
 
 Decisions are made by **content hash, never version strings**: an unchanged re-run is a byte-identical no-op; a file you edited is kept as a conflict (never clobbered) unless `--force`; a departed file is deleted only while its on-disk hash still matches the lock.
