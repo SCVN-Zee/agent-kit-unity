@@ -2,8 +2,8 @@
 
 One recipe per row of [`BOUNDED_DOMAIN_FIELDS.md`](../BOUNDED_DOMAIN_FIELDS.md) §3 — that file decides *which*
 row a field belongs to, this one is only the mechanics. Snippets show fields and providers, not class
-skeletons ([`monobehaviour-template.md`](monobehaviour-template.md)). Odin attrs are unguarded because Odin is
-installed and the target is not a Luna playable; recipe 7 is the two builds where that changes.
+skeletons ([`monobehaviour-template.md`](monobehaviour-template.md)). Odin attrs are unguarded because Odin is installed;
+recipe 7 covers player-build provider mechanics.
 
 ## 1. Stable set → enum
 
@@ -41,7 +41,7 @@ private static IEnumerable<string> GetTags()
 #if UNITY_EDITOR
     return UnityEditorInternal.InternalEditorUtility.tags;
 #else
-    return new string[0];   // not Array.Empty<T>() — unproven on Bridge.NET/Luna
+    return new string[0];   // conservative fallback for transpile targets
 #endif
 }
 ```
@@ -146,15 +146,15 @@ private IEnumerable<string> GetTriggerParams()
     }
     return names;
 #else
-    return new string[0];   // not Array.Empty<T>() — unproven on Bridge.NET/Luna
+    return new string[0];   // conservative fallback for transpile targets
 #endif
 }
 ```
 
-## 7. The `nameof` provider trap — player and Luna builds
+## 7. The `nameof` provider trap — player builds
 
 `[ValueDropdown]` names a member. Strip the member and the attribute no longer compiles. Cosmetic attrs
-(`[Title]`, `[LabelText]`) have no such coupling — `skill://aku-odin/ODIN_ATTRIBUTES.md` §7 owns this rule, on all targets.
+(`[Title]`, `[LabelText]`) have no such coupling — `skill://aku-odin/ODIN_ATTRIBUTES.md` §6 owns this rule, on all targets.
 
 ```csharp
 // ❌ BEFORE — player build fails: nameof(GetTags) cannot resolve a stripped member
@@ -167,17 +167,9 @@ private static IEnumerable<string> GetTags() => InternalEditorUtility.tags;
 ```
 
 The fix is recipe 2's shape: method always compiled, only its body conditional. Which build each half of that
-shape protects — and why the two halves have different reasons — is `skill://aku-odin/ODIN_ATTRIBUTES.md` §7.
+shape protects — and why the two halves have different reasons — is `skill://aku-odin/ODIN_ATTRIBUTES.md` §6.
 
-On a **Luna playable** target the attribute additionally takes the editor-strip guard, in its own bracket,
-never wrapping `[SerializeField]` — mechanics in `rule://aku-luna-rules`:
-
-```csharp
-#if UNITY_EDITOR && ODIN_INSPECTOR
-    [ValueDropdown(nameof(GetTags))]
-#endif
-    [SerializeField] private string _targetTag;   // stays outside → still serializes
-```
+The serialized field remains outside any editor-only region so Unity can load it in every build.
 
 ## 8. No Odin → the degraded tier
 
@@ -194,5 +186,5 @@ recipes 2-4 — where members could plausibly carry data, prefer recipe 5: no Od
 ## Cross-references
 
 - [`../BOUNDED_DOMAIN_FIELDS.md`](../BOUNDED_DOMAIN_FIELDS.md) — the switch test and the decision table
-- `skill://aku-odin/ODIN_ATTRIBUTES.md` — attribute semantics; §7 owns the `nameof` trap (all targets)
+- `skill://aku-odin/ODIN_ATTRIBUTES.md` — attribute semantics; §6 owns the `nameof` trap (all targets)
 - [`scriptableobject-pattern.md`](scriptableobject-pattern.md) — the `[field: SerializeField]` SO shape

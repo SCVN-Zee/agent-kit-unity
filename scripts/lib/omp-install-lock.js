@@ -23,7 +23,7 @@ const { writeAtomic } = require('./global-install-fs');
 
 const LOCK_NAME = 'aku-lock.json';
 const LOCK_VERSION = 1;
-const KIT = 'agentkit-unity';
+const KIT = 'agent-kit-unity';
 
 class CorruptLockError extends Error {
   constructor(message) { super(message); this.name = 'CorruptLockError'; }

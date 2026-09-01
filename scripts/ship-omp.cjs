@@ -7,7 +7,7 @@
  * from a checkout: the packaged `omp/` is resolved from this module's package
  * root, so both find the same source. Target defaults to cwd or the first arg.
  *
- * Exit codes (matching the repo's --check convention, sync-mcp-catalog.cjs):
+ * Exit codes (matching the repo's --check convention):
  *   0 ok / in sync   1 fatal (bad flags, corrupt/forward lock)   2 --check drift/update
  */
 
@@ -15,7 +15,7 @@ const fs = require('fs');
 const path = require('path');
 const { assertRootNotSymlink } = require('./lib/path-safety');
 const lock = require('./lib/omp-install-lock');
-const { computePayload } = require('./lib/omp-install-payload');
+const { computePayload, availableTiers } = require('./lib/omp-install-payload');
 const reconcile = require('./lib/omp-install-reconcile');
 const apply = require('./lib/omp-install-apply');
 const { detect } = require('./lib/omp-tier-detect');
@@ -44,7 +44,7 @@ function parseArgs(argv) {
   return a;
 }
 
-const HELP = `ship-omp — install the agentkit-unity OMP kit into a repo's .omp/
+const HELP = `ship-omp — install the agent-kit-unity OMP kit into a repo's .omp/
 
 Usage: ship-omp [target] [--check|--update|--uninstall] [--dry-run] [--force]
                 [--tier a,b] [--no-tier a,b] [--json]
@@ -59,6 +59,10 @@ Usage: ship-omp [target] [--check|--update|--uninstall] [--dry-run] [--force]
   --tier/--no-tier  add/remove tiers after auto-detection`;
 
 function resolveTiers(target, args) {
+  const valid = availableTiers(KIT_OMP);
+  for (const t of [...args.tier, ...args.noTier]) {
+    if (!valid.includes(t)) throw new Error(`unknown tier '${t}' (available: ${valid.join(', ') || 'none'})`);
+  }
   const set = new Set(detect(target));
   for (const t of args.tier) set.add(t);
   for (const t of args.noTier) set.delete(t);
@@ -81,7 +85,9 @@ function main() {
   catch (e) { process.stderr.write(`ship-omp: ${e.message}\n`); process.exit(1); }
 
   const kitVersion = require(path.join(PKG_ROOT, 'package.json')).version;
-  const tiers = resolveTiers(target, args);
+  let tiers;
+  try { tiers = resolveTiers(target, args); }
+  catch (e) { process.stderr.write(`ship-omp: ${e.message}\n`); process.exit(1); }
   const payload = computePayload(KIT_OMP, tiers);
 
   let prior;

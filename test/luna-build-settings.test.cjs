@@ -8,7 +8,7 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const mod = require('../omp/skills/aku-luna-build-check/scripts/luna-build-settings.cjs');
+const mod = require('../omp/tiers/luna/skills/aku-luna-build-check/scripts/luna-build-settings.cjs');
 const { validate, computeFixes, applyFixes } = mod;
 
 const FIX = path.join(__dirname, 'fixtures');

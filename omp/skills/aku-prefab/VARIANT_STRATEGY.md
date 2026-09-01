@@ -89,8 +89,7 @@ Frame the question with the concrete trade-off, not an abstract "variants?" — 
   base) over depth (long chains).
 - **Overhead vs payoff (YAGNI):** for a throwaway single-playable with a few unrelated props, the
   variant graph earns nothing — flat prefabs are simpler and correct.
-- **Luna / playable:** variants are editor-time asset structure resolved at build, so they survive a
-  Luna export fine — but keep chains shallow for transpile / debug simplicity.
+- **Runtime/export:** variants are editor-time asset structure resolved at build; keep chains shallow for debug simplicity.
 
 ## Mechanic handoff
 

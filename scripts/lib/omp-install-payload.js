@@ -8,7 +8,7 @@
  * file must be tracked and drift-checked. We hash raw Buffers so a one-byte change in any
  * file, text or binary, is detected.
  *
- * Base payload = AGENTS.md, rules/* (incl. the always-apply aku-engine-rules.md), and
+ * Base payload = AGENTS.md, rules/* (incl. the always-apply aku-core-rules.md), and
  * the full skills/** tree.
  * The kit's own omp/README.md and omp/tiers/ are deliberately excluded from the
  * base set (README is not installed; tiers are overlaid explicitly per tier).
@@ -57,15 +57,29 @@ function baseFiles(kitOmpDir) {
   return out;
 }
 
-/** Tier overlay: omp/tiers/<tier>/rules/* → dest rules/<name>, tagged {tier}. */
+/** Tier overlay: omp/tiers/<tier>/rules/* → dest rules/<name>, and
+ *  omp/tiers/<tier>/skills/** → dest skills/<subpath>; both tagged {tier}. */
 function tierFiles(kitOmpDir, tier) {
   const out = {};
-  const dir = path.join(kitOmpDir, 'tiers', tier, 'rules');
-  for (const abs of walkFiles(dir)) {
+  const rulesDir = path.join(kitOmpDir, 'tiers', tier, 'rules');
+  for (const abs of walkFiles(rulesDir)) {
     const dest = 'rules/' + path.basename(abs);
     out[dest] = { srcAbs: abs, hash: hashFile(abs), tier };
   }
+  const skillsDir = path.join(kitOmpDir, 'tiers', tier, 'skills');
+  for (const abs of walkFiles(skillsDir)) {
+    const dest = 'skills/' + path.relative(skillsDir, abs).split(path.sep).join('/');
+    out[dest] = { srcAbs: abs, hash: hashFile(abs), tier };
+  }
   return out;
+}
+
+/** Tier names shipped under omp/tiers/ (sorted directory listing). */
+function availableTiers(kitOmpDir) {
+  try {
+    return fs.readdirSync(path.join(kitOmpDir, 'tiers'), { withFileTypes: true })
+      .filter((e) => e.isDirectory()).map((e) => e.name).sort();
+  } catch (_) { return []; }
 }
 
 /**
@@ -87,4 +101,4 @@ function computePayload(kitOmpDir, tiers = []) {
   return payload;
 }
 
-module.exports = { walkFiles, baseFiles, tierFiles, computePayload, hashFile };
+module.exports = { walkFiles, baseFiles, tierFiles, availableTiers, computePayload, hashFile };

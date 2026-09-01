@@ -3,22 +3,19 @@
  * lint-docs-counts.cjs — fail when documentation states a count that source
  * disagrees with, or when a shipped component has no docs/components/ page.
  *
- * Why this exists: `docs/codebase-summary.md` claimed "276 tools" for months.
- * 276 was the OLD unity-mcp-pro server's count; the kit migrated to
- * ai-game-developer (82) and the number stayed, describing the new snapshot.
- * Nothing checked it. Same defect in `docs/components/rules/README.md` ("250+").
- * Hand-written counts drift silently — so re-derive them and compare.
+ * Why this exists: a hand-typed count once sat in prose for months after the
+ * real number had moved on, and nothing ever re-derived it. Hand-written
+ * counts drift silently — so re-derive them from source and compare.
  *
  * Scope: omp/ + README.md + AGENTS.md + docs/,
  *        minus docs/journals/ (append-only history; old entries legitimately
  *        cite the counts that were true when written).
  *
  * Two check families:
- *   A. Anchored phrases — templates that unambiguously state a catalog count.
- *      Deliberately NOT generic number-scraping: patterns are phrase-shaped, and
- *      tool/prompt counts require 2+ digits so real prose like "chain 2-3 tools
- *      in sequence" cannot trip them.
- *   B. Mirror completeness — every shipped skill/rule/agent/hook/workflow has a
+ *   A. Anchored phrases — templates that unambiguously state a component
+ *      count. Deliberately NOT generic number-scraping: patterns are
+ *      phrase-shaped so ordinary prose does not trip them.
+ *   B. Mirror completeness — every shipped skill/rule has a
  *      docs/components/ page, and every page maps back to a shipped file.
  *
  * Inline ignore: `<!-- docs-counts:ignore -->` on the same or preceding line.
@@ -131,8 +128,7 @@ function parseRoot(argv) {
   if (!countIssues.length && !mirrorIssues.length) {
     const c = facts.counts;
     console.log(
-      `lint-docs-counts: OK (${facts.tools.total} tools, ${facts.prompts.total} prompts, ` +
-      `${c.skills} skills, ${c.rules} rules; mirror complete).`
+      `lint-docs-counts: OK (${c.skills} skills, ${c.rules} rules; mirror complete).`
     );
     process.exit(0);
   }

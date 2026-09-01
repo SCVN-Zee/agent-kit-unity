@@ -131,11 +131,9 @@ compiler validates whatever you pick.
 | warning | `ExclamationTriangleFill` |
 | tools | `Tools`, `Wrench` |
 
-## 9. Luna playable targets
+## 9. Build target boundaries
 
-Editor tooling is already inside `Editor/` or `#if UNITY_EDITOR`, and Luna never transpiles those regions — so
-**`[Button]` and friends cost nothing extra on a playable target**. The Luna editor-strip guard concerns Odin attrs
-on *runtime* fields; see `rule://aku-luna-rules`.
+Editor-only tooling stays under `Editor/` or `#if UNITY_EDITOR`; runtime-field attributes follow the target's installed build rules.
 
 ## Cross-references
 
@@ -145,4 +143,4 @@ on *runtime* fields; see `rule://aku-luna-rules`.
 - `skill://aku-code-conventions/REFERENCE_WIRING.md` — `Setup Refs` auto-wiring, which uses `[Button]` per §3
 - [`examples/editor-tool-window.md`](examples/editor-tool-window.md) — canonical `OdinEditorWindow`
 - [`examples/menu-editor-window.md`](examples/menu-editor-window.md) — cached `OdinMenuEditorWindow` navigation
-- `rule://aku-luna-rules` — Luna editor-strip guard (playable targets only)
+- Installed project-specific rules — target-specific editor-strip policy.

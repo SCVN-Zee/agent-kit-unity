@@ -22,7 +22,7 @@ const CONTENT_PATHS = Object.freeze({
   animatorTree: 'omp/skills/aku-animator/DECISION_TREE.md',
   animatorReview: 'omp/skills/aku-code-review/references/animator-review.md',
   serializationReview: 'omp/skills/aku-code-review/references/checklist-serialization-wiring.md',
-  lunaReview: 'omp/skills/aku-code-review/references/checklist-luna-compatibility.md'
+  lunaReview: 'omp/tiers/luna/skills/aku-luna-code-review/references/checklist-luna-compatibility.md'
 });
 
 function read(relativePath) {

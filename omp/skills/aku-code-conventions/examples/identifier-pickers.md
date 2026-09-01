@@ -182,17 +182,16 @@ private IEnumerable GetAnimatorStatePaths()
 The state provider matches `skill://aku-animator`'s supported top-level state graph. A project using sub-state machines must
 recurse through child state machines rather than flatten duplicate names.
 
-## Validation, Luna, and no-Odin fallback
+## Validation and no-Odin fallback
 
 A dropdown constrains new input but does not migrate renamed values. Add `[ValidateInput]` against the same authority
 when stale data must block authoring. Keep its predicate compiled in every build and guard only its editor body.
 
-On Luna, guard the Sirenix `using` and each Odin attribute with `#if UNITY_EDITOR && ODIN_INSPECTOR`; never guard the
-serialized field. The provider methods above remain compiled, while their UnityEditor bodies are already conditional.
+The provider methods above remain compiled, while their UnityEditor bodies are already conditional.
 
 Without Odin, preserve the sanctioned degraded fallback: primitive fields plus a `static class` of `const` names.
 There is no custom drawer or generated identifier layer in this kit.
 
-See [`bounded-domain-fields.md`](bounded-domain-fields.md) recipe 7 for the exact Luna guard shape and no-Odin tier,
+See [`bounded-domain-fields.md`](bounded-domain-fields.md) recipe 7 for provider and no-Odin mechanics,
 [`ANIMATOR_DRIVING.md`](../ANIMATOR_DRIVING.md) for runtime transitions, and
 `skill://aku-odin/ODIN_ATTRIBUTES.md` for member-referencing attribute build rules.

@@ -1,12 +1,11 @@
 /**
  * Fixture kit for lint-docs-counts tests.
+ * Builds the smallest tree deriveFacts() can read for the OMP kit: a component
+ * inventory (skills + rules) with a COMPLETE docs/components mirror — so family
+ * B (mirror completeness) stays silent unless a test deliberately perturbs it,
+ * and family A (count phrases) can be exercised alone.
  *
- * Builds the smallest tree deriveFacts() can read for the OMP kit: two snapshots
- * and a component inventory (skills + rules) with a COMPLETE docs/components
- * mirror — so family B (mirror completeness) stays silent unless a test
- * deliberately perturbs it, and family A (count phrases) can be exercised alone.
- *
- * Fixture counts: 82 tools (74 core), 46 prompts, 2 skills, 2 rules.
+ * Fixture counts: 2 skills, 2 rules.
  */
 
 const fs = require('fs');
@@ -19,10 +18,8 @@ const SCRIPT = path.join(KIT_ROOT, 'scripts/lint-docs-counts.cjs');
 
 const DIRS = [
   'omp/skills/aku-alpha', 'omp/skills/aku-beta', 'omp/rules',
-  'snapshots', 'docs', 'docs/journals',
-  'docs/components/skills', 'docs/components/rules'
+  'docs', 'docs/journals', 'docs/components/skills', 'docs/components/rules'
 ];
-
 const MIRROR = {
   skills: ['aku-alpha', 'aku-beta'],
   rules: ['aku-one', 'aku-two']
@@ -31,13 +28,6 @@ const MIRROR = {
 function makeTmpRoot() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aku-counts-'));
   for (const d of DIRS) fs.mkdirSync(path.join(dir, d), { recursive: true });
-
-  write(dir, 'snapshots/mcp-tools.json', JSON.stringify({
-    count: 82,
-    sourceCounts: { core: 74, 'unity-ai-animation': 6, 'unity-ai-particlesystem': 2 },
-    tools: []
-  }));
-  write(dir, 'snapshots/mcp-prompts.json', JSON.stringify({ count: 46, enabledCount: 0, prompts: [] }));
 
   write(dir, 'omp/skills/aku-alpha/SKILL.md', '# alpha\n');
   write(dir, 'omp/skills/aku-beta/SKILL.md', '# beta\n');

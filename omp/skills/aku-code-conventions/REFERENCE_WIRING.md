@@ -81,7 +81,7 @@ Manual Inspector dragging is tedious and error-prone for many refs. The sanction
 **Rules:**
 - Wrap the whole region in `#if UNITY_EDITOR`. What breaks a player build is the **body's `UnityEditor.*` calls** (`Undo`, `EditorUtility`) — those types don't exist in builds. `Reset()` and the trigger attribute are harmless on their own, but wrapping the whole region is the clean way to strip the editor-only logic.
 - **Trigger is `[Button]`** when Odin is installed — it renders an actual button in the Inspector, where a `[ContextMenu]` gear entry is discoverable only by people who already know it exists. **Without Odin, use `[ContextMenu("Setup Refs")]`.** Icon guidance: `skill://aku-odin/EDITOR_TOOLING.md` §3.
-- Because the region is already `#if UNITY_EDITOR`, `[Button]` here costs **nothing extra on a Luna playable target** — the whole block is stripped before transpile either way.
+- Because the region is already `#if UNITY_EDITOR`, `[Button]` here costs nothing extra — the whole block is stripped before transpile.
 - `EditorUtility.SetDirty(this)` is **required** so the assignment persists into the scene/prefab; `Undo.RecordObject` makes it undoable.
 - Use fully-qualified `UnityEditor.*` (no top-level `using UnityEditor;` to guard).
 - `Reset()` wires what exists when the component is added; re-run **Setup Refs** from the Inspector after building children.

@@ -70,7 +70,7 @@ Each entry is **symptom → cause → fix**. Symptoms come first because that is
 
 **Cause.** `writeDefaultValues` (WriteDefaults) is inconsistent across states. Mixed WD in one controller is the classic source of skipped transitions and pose bleed.
 
-**Fix.** Make WD uniform — `false` across the controller is the common recommendation, and is **required** on Luna playable targets (`skill://aku-code-review-luna`). **Not settable via the batched edit** — recipe in [`FALLBACK_RECIPES.md`](FALLBACK_RECIPES.md).
+**Fix.** Make WD uniform — `false` across the controller. **Not settable via the batched edit** — recipe in [`FALLBACK_RECIPES.md`](FALLBACK_RECIPES.md).
 
 ## Capability gaps
 

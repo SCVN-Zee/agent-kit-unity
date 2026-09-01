@@ -26,7 +26,7 @@ test('user files survive install, update, and uninstall', () => {
   const t = sandbox();
   try {
     ship(t);
-    fs.writeFileSync(omp(t, 'aku-project.json'), '{"concurrentSessions":false}\n');
+    fs.writeFileSync(omp(t, 'aku-project.json'), '{"odin":false}\n');
     fs.writeFileSync(omp(t, 'rules/house-style.md'), '# my house style\n');
     assert.equal(ship(t, ['--update']).code, 0);
     assert.ok(fs.existsSync(omp(t, 'aku-project.json')), 'marker survives update');
@@ -43,11 +43,11 @@ test('uninstall keeps a drifted managed file, never deleting it', () => {
   const t = sandbox();
   try {
     ship(t);
-    fs.appendFileSync(omp(t, 'rules/aku-engine-rules.md'), '\nUSER EDIT\n');
+    fs.appendFileSync(omp(t, 'rules/aku-core-rules.md'), '\nUSER EDIT\n');
     const r = ship(t, ['--uninstall']);
     assert.equal(r.code, 0);
     assert.match(r.out, /kept/i);
-    assert.ok(fs.existsSync(omp(t, 'rules/aku-engine-rules.md')), 'drifted file kept');
+    assert.ok(fs.existsSync(omp(t, 'rules/aku-core-rules.md')), 'drifted file kept');
     assert.ok(!fs.existsSync(omp(t, 'AGENTS.md')), 'clean managed file removed');
   } finally { cleanup(t); }
 });
@@ -56,7 +56,7 @@ test('uninstall preview and apply protect legacy orphan-marked bytes unless forc
   const t = sandbox();
   const mismatchRel = 'skills/aku-scene/SKILL.md';
   const absentRel = 'skills/aku-prefab/SKILL.md';
-  const driftedRel = 'rules/aku-engine-rules.md';
+  const driftedRel = 'rules/aku-core-rules.md';
   try {
     ship(t);
     const lockPath = omp(t, 'aku-lock.json');
@@ -72,7 +72,7 @@ test('uninstall preview and apply protect legacy orphan-marked bytes unless forc
     const normalDry = ship(t, ['--uninstall', '--dry-run']);
     assert.match(normalDry.out, /would keep.*AGENTS\.md/is);
     assert.match(normalDry.out, /would keep.*aku-scene\/SKILL\.md/is);
-    assert.match(normalDry.out, /would keep.*aku-engine-rules\.md/is);
+    assert.match(normalDry.out, /would keep.*aku-core-rules\.md/is);
     assert.match(normalDry.out, /already absent.*aku-prefab\/SKILL\.md/is);
     const forceDry = ship(t, ['--uninstall', '--dry-run', '--force']);
     assert.match(forceDry.out, /would remove.*AGENTS\.md/is);

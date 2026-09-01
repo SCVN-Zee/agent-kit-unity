@@ -46,7 +46,7 @@ retroactively to a legacy codebase produces hundreds of findings and trains peop
 | `SdfIcons` / `SirenixEditorGUI` outside `Editor/` or `#if UNITY_EDITOR` | **finding** — editor-only assembly in runtime code, player build fails |
 | `SdfIcons.CreateTransparentIconTexture` called from `OnGUI`/per-repaint without caching | **finding** — allocates a `Texture2D` every frame (cross-ref Lens 1) |
 | `EditorGUIUtility.IconContent("…")` name string in new tooling | **nit** — silent blank icon when wrong; prefer compile-checked `SdfIconType` |
-| Odin attr unguarded on a **Luna playable** target | **critical** — see `checklist-luna-compatibility.md` |
+| Odin attr unguarded where the target build rule requires editor stripping | **critical** — follow that target rule |
 
 `[SerializeField]` is never replaced by an Odin attr and never moves inside a conditional-compilation guard —
 Odin decorates, Unity serializes. Same for the rest of the keep-list in `skill://aku-odin/ODIN_ATTRIBUTES.md` §4.
@@ -60,4 +60,4 @@ Odin decorates, Unity serializes. Same for the rest of the keep-list in `skill:/
 - `Debug.LogError` for genuinely exceptional, rare runtime failures (kept intentionally).
 - Editor code correctly under `Editor/` or `#if UNITY_EDITOR`.
 - Built-in `[Header]`/`[Tooltip]` in a project **without** Odin — correct there, not a finding.
-- Correctly guarded Odin attrs on a Luna playable target.
+- Correctly guarded Odin attrs where the target build rule requires it.

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * lint-loc.cjs — fail CI if any kit code/skill file exceeds 200 LOC, with
- * documented carve-outs (MCP_CATALOG.md is reference data, not behavior).
+ * documented carve-outs (CHANGELOG.md and README.md are prose, not behavior).
  *
  * Walks omp/ and scripts/. Skips node_modules and tests fixtures.
  */
@@ -16,7 +16,6 @@ const HARD_CAP = 200;
 
 // Files explicitly exempted (reference data, not behavior).
 const CARVE_OUTS = new Set([
-  path.join(KIT_ROOT, 'docs/MCP_CATALOG.md'),
   path.join(KIT_ROOT, 'CHANGELOG.md'),
   path.join(KIT_ROOT, 'README.md')
 ]);

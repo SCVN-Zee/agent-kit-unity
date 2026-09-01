@@ -75,7 +75,7 @@ To target one transition, filter on `transition.destinationState.name`.
 
 ## 3. `writeDefaultValues = false` across every state
 
-Fixes trap 8. Uniform WD prevents skipped transitions and pose bleed. Mandatory on Luna playable targets — see `skill://aku-code-review-luna`.
+Fixes trap 8. Uniform WD prevents skipped transitions and pose bleed.
 
 ```csharp
 int stateCount = 0;
@@ -124,7 +124,7 @@ foreach (AnimatorControllerLayer layer in controller.layers)
 
 These snippets write the asset directly, so read the graph back afterwards — the mutation happened outside the batched animator edit and its `errors[]` reporting.
 
-If you find yourself running the same recipe more than twice, land a permanent editor helper under `Assets/Editor/` instead (authoring a `.cs` script is out of this kit's scope — route per `rule://aku-capability-routing`).
+If you find yourself running the same recipe more than twice, land a permanent editor helper under `Assets/Editor/` instead.
 
 ## When the editor-side C# snippet is unavailable
 

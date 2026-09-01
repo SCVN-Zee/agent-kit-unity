@@ -114,4 +114,4 @@ For per-instance state (current HP, etc.), copy fields into the consuming MonoBe
 ## Cross-references
 
 - [`STRUCTURE.md`](../STRUCTURE.md) — class structure
-- C# authoring → the installed C#-authoring skill (per `rule://aku-capability-routing`); this file is the canonical SO convention template
+- This file is the canonical ScriptableObject convention template

@@ -8,6 +8,6 @@ interruptMode: tool-only
 
 STOP — you are about to `edit`/`write` a Unity asset file that corrupts on hand-edit (`.prefab .unity .controller .anim .mat .playable .signal`). A plain text edit breaks its FileID webs, prefab-apply chains, and serialization.
 
-Route this mutation through your **connected Unity MCP** instead — bind to the matching capability already in your in-context tool list (scene/prefab/asset/animator/material). If no Unity MCP tool matches, make the change in the Editor or via a committed-state `git` op — not by editing the serialized file. If no Unity MCP is connected at all, pause this asset work.
+Do not edit the serialized file. Route this mutation per the policy table's designated channel for this op family (`rule://aku-mcp-policy`): CLI-live only where the table marks it primary, else the connected Unity MCP — bind the matching capability already in your in-context tool list (scene/prefab/asset/animator/material); if neither channel is available, make the change in the Editor or via a committed-state `git` op — not by editing the serialized file; if no channel exists at all, pause this asset work.
 
 Full policy: `rule://aku-mcp-policy`. Focused workflows: `skill://aku-scene`, `skill://aku-prefab`, and `skill://aku-animator`.

@@ -2,7 +2,7 @@
 
 The animator/animation capabilities and their data model. Field names and op types below are the portable Unity animator schema (`UnityEditor.Animations.AnimatorController` / `AnimationUtility`), not one server's tool names.
 
-> **Bind each capability here to the Unity MCP tools already in your in-context tool list** — match the capability, not a hardcoded name; do not call a tool-introspection command to "discover" them, the client already surfaces them. If a needed capability has no matching tool (the AI Animation editing set is an *extension*, not core — it may be absent), fall back to **find a method by reflection → call it by reflection** on `UnityEditor.Animations.AnimatorController` / `AnimationUtility`, or **run an editor-side C# snippet**, rather than editing the `.controller` / `.anim` file directly.
+> **Bind each capability here to the Unity MCP tools already in your in-context tool list** — match the capability, not a hardcoded name; do not call a tool-introspection command to "discover" them, the client already surfaces them. If a needed capability has no matching tool (animation-editing capabilities may be absent on some servers), fall back to **find a method by reflection → call it by reflection** on `UnityEditor.Animations.AnimatorController` / `AnimationUtility`, or **run an editor-side C# snippet**, rather than editing the `.controller` / `.anim` file directly.
 
 ## Animator controller
 

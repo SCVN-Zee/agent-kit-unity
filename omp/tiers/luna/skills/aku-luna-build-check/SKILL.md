@@ -7,7 +7,7 @@ description: "Use when validating or auto-fixing Luna (Playworks) export setting
 
 Reads a Luna Playworks `luna.json`, checks the export build settings against house rules
 (**two-tier**: 🔴 gates that must pass, 🟡 advisories that are judgment calls), and **surgically
-auto-fixes** failing gates on confirmation. Distinct from `skill://aku-code-review-luna` — that checks
+auto-fixes** failing gates on confirmation. Distinct from `skill://aku-luna-code-review` — that checks
 *will-it-transpile*; this checks *is-it-tuned*.
 
 **Principles:** YAGNI, KISS, DRY | Token efficiency | Honest, concise. **Gates auto-fixable; advisories report-only.**
@@ -82,5 +82,5 @@ If all gates pass: report the verdict and list any advisory deviations for the u
 
 ## Workflow position
 
-**Typically precedes:** a Luna build (Cmd+E export), the installed shipping/release skill (per `rule://aku-capability-routing`).
-**Related:** `skill://aku-code-review-luna` (compatibility lens — complementary) and the focused Unity skill that owns the changed scene, prefab, or Animator asset.
+**Typically precedes:** a Luna build (Cmd+E export), shipping, or release.
+**Related:** `skill://aku-luna-code-review` (compatibility lens — complementary) and the focused Unity skill that owns the changed scene, prefab, or Animator asset.

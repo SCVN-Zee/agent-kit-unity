@@ -1,13 +1,15 @@
 ---
-description: "Use when editing Odin-decorated C# for a Luna (Playwork) playable target. Wrap every Sirenix attribute in the required editor-strip guard so Bridge.NET never sees Odin; Luna compatibility review and luna.json build settings use their focused skills."
-globs: ["**/*.cs"]
+description: "Use when authoring Luna (Playwork) playable Odin-decorated C#, Animator controllers, prefabs, scenes, or materials. Apply the editor-strip guard and load the Luna authoring conventions; Luna compatibility review and luna.json build settings use focused skills."
+globs: ["**/*.cs", "**/*.controller", "**/*.anim", "**/*.prefab", "**/*.unity", "**/*.mat"]
 ---
 
 # Unity Luna Rules
 
 Luna (Playwork) playable-ad build constraints. Applies on a **playable target** carrying the Luna package (`.omp/aku-project.json {"lunaPlayable":true}` wins; else the branch name contains `playable`).
 
-Layered on `skill://aku-odin`, which owns the general "Odin attrs are mandatory when installed" rule. This file owns the Luna editor-strip guard.
+Layered on `skill://aku-odin`, which owns the general Odin mandate. This file owns the Luna editor-strip guard.
+
+For Luna playable authoring, also load `skill://aku-luna-conventions`. That skill owns export-sensitive authoring guidance; `skill://aku-luna-code-review` remains report-only.
 
 ## Odin editor-strip guard — `#if UNITY_EDITOR && ODIN_INSPECTOR`
 
@@ -53,5 +55,5 @@ In editor: both symbols defined → Odin draws the rich Inspector. In a player b
 
 - `skill://aku-odin` — the general Odin mandate (`[Header]`/`[Tooltip]` → Odin equivalents) + the built-in keep-list.
 - `skill://aku-odin/ODIN_ATTRIBUTES.md` — built-in→Odin attribute mapping table.
-- `skill://aku-code-review-luna` — Luna transpile review lens (flags unguarded Odin attrs as critical).
+- `skill://aku-luna-code-review` — Luna transpile review lens (flags unguarded Odin attrs as critical).
 - `skill://aku-luna-build-check` — Luna export build-settings probe before a Luna build.

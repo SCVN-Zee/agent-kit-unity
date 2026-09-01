@@ -9,6 +9,10 @@ Scene / hierarchy / component / prefab-**instance** work via the connected Unity
 
 > **Binding instruction.** Bind each capability below to the Unity MCP tools already surfaced in your in-context tool list — match the capability, not a hardcoded name. If none matches, do it in the Editor or via a committed-state `git` op.
 
+**Channel.** Capabilities below are transport-neutral. Resolve the transport per `rule://aku-mcp-policy`'s ladder + table: the Unity CLI (Pipeline) where the table marks the family CLI and detection passes; else the connected Unity MCP; else the Editor or a committed-state `git` op; if no channel is available, pause.
+
+**CLI recipes (Pipeline; `unity command` + args `--param value` using schema names).** Reads (proven-run 2026-08-30): `get_scene_hierarchy` (active-scene tree, per-node `instanceId`/`hierarchyPath`), `list_open_scenes`, `find_assets --type <Type> --name <substr>` (returns `assetPath`/`guid`/`globalId`), `find_gameobjects`, `get_component_properties`, `console --tail <n>`. Writes (surface-verified; verify via `unity command` listing at use): `open_scene` / `save_scene` / `save_all` / `set_active_scene` / `create_scene`; `create_gameobject` / `delete_gameobject` (Undo-reversible) / `rename_gameobject`; `add_component` / `set_component_properties` / `remove_component`; `set_selection` / `get_selection`; C# escape hatch `eval` (Roslyn, editor-side).
+
 Sub-files:
 
 | File | Purpose |
@@ -44,4 +48,3 @@ Sub-files:
 - `rule://aku-mcp-policy` — serialized-asset safety, direct domain routing, and non-domain fallbacks.
 - `skill://aku-prefab` — prefab-**asset** lifecycle (create / instantiate / variant) + prefab-stage editing. This skill keeps the prefab-**instance** apply-tier decision.
 - `skill://aku-asset-conventions` — asset paths + naming (`SC_` scenes; prefabs unprefixed; layout per `PROJECT_LAYOUT.md`).
-- `docs/MCP_CATALOG.md` (repo reference, illustrative) — the full example tool catalog (Scene / GameObject / Assets sections); bind at runtime to your in-context tool list.

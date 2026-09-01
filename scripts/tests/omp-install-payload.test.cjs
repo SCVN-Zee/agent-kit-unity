@@ -50,7 +50,7 @@ function skillFiles(base, name) {
 test('base payload includes AGENTS.md, rules/*, and skills/**', () => {
   const base = payload.baseFiles(KIT_OMP);
   assert.ok(base['AGENTS.md'], 'AGENTS.md');
-  assert.ok(base['rules/aku-engine-rules.md'], 'the always-apply base rule');
+  assert.ok(base['rules/aku-core-rules.md'], 'the always-apply base rule');
   assert.ok(base['rules/aku-mcp-policy.md'], 'a base rule');
   assert.ok(base['skills/aku-scene/SKILL.md'], 'a skill SKILL.md');
   assert.ok(base['skills/aku-scene/CINEMACHINE.md'], 'the focused Cinemachine recipe');
@@ -88,12 +88,18 @@ test('base payload excludes README.md and tiers/', () => {
   }
 });
 
-test('non-.md skill subfiles are enumerated with a correct raw-byte hash', () => {
-  const base = payload.baseFiles(KIT_OMP);
-  const cjs = base['skills/aku-luna-build-check/scripts/luna-build-settings.cjs'];
-  assert.ok(cjs, 'luna-build-settings.cjs must be in the payload');
+test('availableTiers lists the shipped tiers sorted', () => {
+  assert.deepEqual(payload.availableTiers(KIT_OMP), ['luna', 'supercent']);
+});
 
-  const bytes = fs.readFileSync(path.join(KIT_OMP, 'skills/aku-luna-build-check/scripts/luna-build-settings.cjs'));
+test('non-.md tier-skill subfiles are enumerated with a correct raw-byte hash', () => {
+  const rel = 'skills/aku-luna-build-check/scripts/luna-build-settings.cjs';
+  const tf = payload.tierFiles(KIT_OMP, 'luna');
+  const cjs = tf[rel];
+  assert.ok(cjs, 'luna-build-settings.cjs must be in the luna tier payload');
+  assert.equal(cjs.tier, 'luna');
+
+  const bytes = fs.readFileSync(path.join(KIT_OMP, 'tiers/luna', rel));
   const expected = 'sha256:' + crypto.createHash('sha256').update(bytes).digest('hex');
   assert.equal(cjs.hash, expected);
 });

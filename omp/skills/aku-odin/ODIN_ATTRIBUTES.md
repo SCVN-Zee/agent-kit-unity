@@ -75,28 +75,10 @@ This covers **display, behavior, and editor-tooling** attributes.
 and carry perf and portability consequences the display attrs do not. A separate, harder question — flag for the
 engineer kit, don't auto-adopt.
 
-## 6. Luna playable builds (Luna-tier)
-
-On a Luna **playable** target, Odin must be editor-stripped from the build — it is a precompiled DLL and Luna's
-Bridge.NET transpiler cannot transpile it, so an unguarded Odin reference breaks the Luna build. That editor-strip
-guard is **Luna-tier**: see **`rule://aku-luna-rules`** (auto-loaded only on playable targets) for the pattern and its
-three mechanics.
-
-**Off a playable target, cosmetic attrs need no guard.** Odin's attribute assembly is runtime-safe, so
-`[Title]`, `[LabelText]`, `[PropertyTooltip]` and friends compile into normal player builds unchanged. Do not
-wrap them defensively.
-
-Cosmetic attrs are the *only* ones this covers — attrs naming a member have their own rule in §7, which applies
-on every target, playable or not.
-
-On Luna, prefer the **section-level** attrs from §2 (`[Title]`, `[PropertyTooltip]`) over per-field grouping
-(`[BoxGroup]`, `[FoldoutGroup]`): `[Title]` sits on one field per section exactly like `[Header]` did, so the
-guard count stays where it is today instead of multiplying by field count.
-
-## 7. Attrs that name a member (all targets — not Luna-tier)
+## 6. Attrs that name a member (all targets)
 
 `[ValueDropdown]`, `[ShowIf]`, `[HideIf]`, `[EnableIf]`, `[ValidateInput]` and friends reference another member.
-That coupling outlives §6's playable-target scope, so this section applies to **every** build:
+That coupling applies to **every** build:
 
 | Reference form | Member stripped by `#if UNITY_EDITOR` | Consequence |
 | --- | --- | --- |
@@ -108,16 +90,12 @@ This bites hardest on bounded-domain pickers, whose providers must reach `Intern
 `AnimatorController`, or `AssetDatabase` — worked BEFORE/AFTER in
 `skill://aku-code-conventions/examples/bounded-domain-fields.md` recipe 7.
 
-On a Luna playable target the attribute is itself stripped by the §6 guard, so the `nameof` coupling disappears
-there. The provider's **body** must still be guarded, because the provider is ordinary runtime C# the transpiler
-does see. Keeping the method compiled is owed to the non-Luna player build, not to Luna.
-
-## 8. `[Required]` — its own subfile
+## 7. `[Required]` — its own subfile
 
 The mandate that every serialized reference carries `[Required]`, its type matrix, the own-bracket shape, the
 `[PropertyTooltip]` opt-out, the `[RequiredIn]` prefab tier, the collections no-op, and the no-Odin assert tier live
 in **`skill://aku-code-conventions/REQUIRED_FIELDS.md`**. Split out because the assert tier is plain C# and applies with or
 without Odin — same reason `skill://aku-code-conventions/BOUNDED_DOMAIN_FIELDS.md` is not folded in here.
 
-Two rules in this file are load-bearing for it: §1 (the presence gate) and §7 (keep a named member compiled in every
+Two rules in this file are load-bearing for it: §1 (the presence gate) and §6 (keep a named member compiled in every
 build — `[ValidateInput]` in the collections tier depends on it).

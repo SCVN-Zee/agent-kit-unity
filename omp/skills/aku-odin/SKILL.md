@@ -44,9 +44,9 @@ Confirm presence per `AGENTS.md`: `Assets/Plugins/Sirenix/` exists, or `Packages
 2. **Keep-list — built-ins with no Odin twin, always keep:** `[SerializeField]`, `[SerializeReference]`, `[RequireComponent]`, `[CreateAssetMenu]`, `[ExecuteAlways]`, `[AddComponentMenu]`, `[HelpURL]`, `[field:]` forwarding. Odin decorates, Unity serializes. `ODIN_ATTRIBUTES.md` §4.
 3. **Icon-first editor tooling.** Inspector actions are `[Button(SdfIconType.X, IconAlignment.LeftOfText)]`, not bare text and not `[ContextMenu]`. Custom tools carry icons. `SdfIconType` only — never `EditorGUIUtility.IconContent` strings. `EDITOR_TOOLING.md`.
 4. **Not runtime serialization.** `SerializedMonoBehaviour` / `[OdinSerialize]` are out of scope.
-5. **Luna playable strip is Luna-tier.** Point at `rule://aku-luna-rules`. Off a playable target, cosmetic attrs need no guard.
+5. **Project-specific build rules are extensions.** Apply installed compatibility rules only when their detection contract matches.
 6. **`[Required]` is conventions.** Completeness of serialized refs: `skill://aku-code-conventions/REQUIRED_FIELDS.md`. This skill only supplies the presence gate it depends on.
-7. **Which fields need a picker is conventions.** `[ValueDropdown]` is the mechanism; the switch test lives in `skill://aku-code-conventions/BOUNDED_DOMAIN_FIELDS.md`. Keep named members compiled (`ODIN_ATTRIBUTES.md` §7).
+7. **Which fields need a picker is conventions.** `[ValueDropdown]` is the mechanism; the switch test lives in `skill://aku-code-conventions/BOUNDED_DOMAIN_FIELDS.md`. Keep named members compiled (`ODIN_ATTRIBUTES.md` §6).
 8. **Compose the Inspector around authoring tasks.** Short flows stay linear; stable sibling domains may use tabs; large multi-page tools use menu navigation. `INSPECTOR_UX.md`.
 9. **Escalate editor APIs deliberately.** Attributes → `OdinEditorWindow` → menu tree → selectors/property trees/drawers. Advanced surfaces are not defaults. `ADVANCED_EDITOR_TOOLING.md`.
 
@@ -58,7 +58,7 @@ Confirm presence per `AGENTS.md`: `Assets/Plugins/Sirenix/` exists, or `Packages
 | "Odin is a preference" | It is mandatory when installed. Absence is the only off-ramp. |
 | "Drop `[SerializeField]`, the Odin attr is enough" | Keep-list. Odin draws; Unity serializes. |
 | "Text `[Button]` is fine" | Icon-first. `SdfIconType` is compile-checked; `IconContent` strings fail silent. |
-| "I'll wrap every Odin attr in `#if` just in case" | Cosmetic attrs are runtime-safe off Luna. The strip token is Luna-tier only. |
+| "I'll wrap every Odin attr in `#if` just in case" | Cosmetic attrs are runtime-safe when supported by the target; guard only when an installed build rule requires it. |
 
 ## Workflow position
 
@@ -66,7 +66,7 @@ Confirm presence per `AGENTS.md`: `Assets/Plugins/Sirenix/` exists, or `Packages
 rule://aku-code-convention-rules  (automatic bridge for **/*.cs work)
   → skill://aku-code-conventions (code policy + task-specific routing)
   → skill://aku-odin              (this skill, mandate + mapping + tooling)
-  → rule://aku-luna-rules         (playable targets only — editor-strip guard)
+  → installed project-specific rules (only when their detection contract matches)
 ```
 
 ## Cross-references
@@ -76,5 +76,5 @@ rule://aku-code-convention-rules  (automatic bridge for **/*.cs work)
 - `skill://aku-code-conventions/BOUNDED_DOMAIN_FIELDS.md` — enum vs picker vs SO
 - `skill://aku-code-conventions/STRUCTURE.md` — section dividers the grouping attrs sit on
 - `skill://aku-code-conventions/REFERENCE_WIRING.md` — `Setup Refs` uses `[Button]`
-- `rule://aku-luna-rules` — Luna playable editor-strip guard
+- Installed project-specific rules — target build constraints outside common Odin policy.
 - `skill://aku-code-review/references/checklist-editor-build-hygiene.md` — review lens for this mandate

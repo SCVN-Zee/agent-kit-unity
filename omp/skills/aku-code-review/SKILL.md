@@ -1,6 +1,6 @@
 ---
 name: aku-code-review
-description: "Use when performing a report-only review of a Unity file, diff, commit, PR, or completed feature, including Unity C#. Owns review routing and read-only verification across runtime code, editor tooling, shaders, and serialized wiring; loads skill://aku-code-conventions as its convention lens and skill://aku-code-review-luna for Luna compatibility."
+description: "Use when performing a report-only review of a Unity file, diff, commit, PR, or completed feature, including Unity C#. Owns review routing and read-only verification across runtime code, editor tooling, shaders, and serialized wiring; loads skill://aku-code-conventions as its convention lens."
 ---
 
 # aku-code-review — Unity Code Review
@@ -11,13 +11,13 @@ Game-dev code review for Unity. Replaces the SRE/web lenses of the installed gen
 
 ## Layering (do NOT duplicate)
 
-This skill is a Unity **lens pack** on top of generic code-review machinery. Load the installed generic code-review skill (per `rule://aku-capability-routing`) for that machinery; this skill adds the Unity lenses + MCP-native verification.
+Apply the host's normal code-review machinery; this skill adds the Unity lenses and MCP-native verification.
 
 | Concern | Owned by | This skill |
 | --- | --- | --- |
 | Input-mode resolution, reception, spec-compliance, verification-gate philosophy | the installed generic code-review skill | reference, don't copy |
 | C# formatting / naming / structure / reference-wiring rules | `skill://aku-code-conventions` | lens 4 delegates |
-| Unity perf / lifecycle / serialization / editor-build / shader / asset-integrity / luna-compat | **this skill** | the 7 reference files |
+| Unity perf / lifecycle / serialization / editor-build / shader / asset-integrity | **this skill** | the 6 reference files |
 
 ## Input modes
 
@@ -42,11 +42,11 @@ Resolution detail: resolve input mode (PR / commit / `--pending` / none / codeba
 | 3 | Serialization & wiring | `references/checklist-serialization-wiring.md` |
 | 4 | Convention compliance | **inline** → load `skill://aku-code-conventions` and check all 12 rules; when asset paths/names or scene/prefab hierarchy names change, also load `skill://aku-asset-conventions` and check all 4 rules |
 | 5 | Editor & build hygiene | `references/checklist-editor-build-hygiene.md` |
-| 6 | Luna playable compat *(conditional — Luna projects only)* | `references/checklist-luna-compatibility.md` |
+| 6 | Project-specific compatibility *(conditional — installed extensions only)* | the installed tier extension |
 
 Surface extensions (reviewed through the lenses above): **shaders/compute** → `references/checklist-shader-gpu.md`; **scene/prefab/SO reference integrity** → `references/asset-integrity-review.md`; **Animator graph + driving code** → `references/animator-review.md`.
 
-**Luna auto-detect (Lens 6).** Before Stage 1, check whether this is a Luna playable project: `luna.json` at the project root or `unity_project/<project>/`; Luna/Playworks in `Packages/manifest.json` or an `Assets/Luna/` folder; the diff touches a `**/Playable*/` path; or the prompt names Luna. On a match, add Lens 6 — or hand the whole pass to `skill://aku-code-review-luna` for a Luna-focused run. No match → skip Lens 6 silently; non-Luna Unity reviews are unchanged.
+**Project-specific compatibility.** Before Stage 1, apply any installed compatibility extension according to that extension's own detection contract. No matching extension → skip it; ordinary Unity reviews are unchanged.
 
 ## Review protocol (2 stages)
 
@@ -60,11 +60,13 @@ Surface extensions (reviewed through the lenses above): **shaders/compute** → 
 
 Bind each capability to the Unity MCP tools already surfaced in your in-context tool list — match the capability, not a hardcoded name. If none matches, read via the Editor. Never hand-edit a serialized asset file.
 
+**Channel.** Verification reads are CLI-first where the ladder passes (`rule://aku-mcp-policy`): console read via `unity command console --tail <n>` (proven-run 2026-08-30); tests inventory via `unity command list_tests --mode EditMode` (proven-run 2026-08-30); asset lookups via `find_assets` (proven-run 2026-08-30). **Test execution is MCP-primary in-session** — run via MCP `tests-run` (save the scene first; a dirty scene aborts the runner); `unity command run_tests` + `test_status` are verify-at-use alternatives, not the default route. Headless `unity test --mode EditMode --report-format nunit` (spellings help-verified) applies only with the project closed in the interactive Editor. Other verification reads fall back to the MCP console-read capability; terminal fallback: read via the Editor.
+
 No profiler step — perf findings are reasoned statically (kept light by design).
 
 ## Report-only
 
-Findings + fix examples only. **Never edit code/assets.** Route C# fixes to the installed C#-authoring skill (per `rule://aku-capability-routing`; native `Edit` fallback if none); Editor-state fixes (scene/prefab/animator) are applied separately through the connected Unity MCP, not in this read-only pass.
+Findings + fix examples only. **Never edit code/assets.** Fixes happen in a separate implementation pass; Editor-state fixes (scene/prefab/animator) are applied through the connected Unity MCP, not in this read-only pass.
 
 ## Output format
 
@@ -101,10 +103,10 @@ Flag a finding once, under its most specific lens. If a finding is also a conven
 | `references/checklist-shader-gpu.md` | precision, variants, frag cost, overdraw |
 | `references/asset-integrity-review.md` | read-only MCP reference-integrity protocol |
 | `references/animator-review.md` | read-only Animator protocol: forced `Play`/`CrossFade`, unreachable states, conditionless transitions, weight-0 layers |
-| `references/checklist-luna-compatibility.md` | Luna playable compat (conditional): Bridge.NET / forbidden-API source hazards + read-only asset checks |
+| Project-specific compatibility | installed tier extension | target-specific checks owned by that extension |
 
 ## Workflow position
 
-**Typically follows:** the focused Unity domain skill or installed C#-authoring skill (per `rule://aku-capability-routing`) used for the change.
-**Typically precedes:** the installed shipping/release skill (per `rule://aku-capability-routing`).
-**Related:** the installed generic code-review skill (generic protocol it layers on), `/skill:aku-code-conventions` and `/skill:aku-asset-conventions` (convention lenses), `/skill:aku-code-review-luna` (Luna playable-compat sub-lens, auto-invoked on Luna projects). Run this review inline — the main agent walks the protocol directly.
+**Typically follows:** the focused Unity domain workflow or implementation pass used for the change.
+**Typically precedes:** shipping or release.
+**Related:** the installed generic code-review skill (generic protocol it layers on), `/skill:aku-code-conventions` and `/skill:aku-asset-conventions` (convention lenses). Run this review inline — the main agent walks the protocol directly.

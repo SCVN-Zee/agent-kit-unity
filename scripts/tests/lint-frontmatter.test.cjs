@@ -44,10 +44,10 @@ function withSandbox(run) {
   finally { fs.rmSync(root, { recursive: true, force: true }); }
 }
 
-test('CLI scans the complete 9/7/3 metadata inventory', () => {
+test('CLI scans the complete 7/5/2/3 metadata inventory', () => {
   const run = spawnSync(process.execPath, [LINTER], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /19 surfaces: 9 skills, 7 base rules, 3 tier rules/);
+  assert.match(run.stdout, /17 surfaces: 7 skills, 5 base rules, 2 tier rules, 3 tier skills/);
 });
 
 test('inventory rejects missing files and uncontracted additions', () => withSandbox((root) => {
@@ -106,10 +106,10 @@ test('report-only review has one discovery owner', () => withSandbox((root) => {
 
 test('always, glob, and TTSR trigger metadata cannot drift', () => withSandbox((root) => {
   const cases = [
-    ['rules/aku-engine-rules.md', (b) => b.replace('alwaysApply: true', 'alwaysApply: false'), 'must preserve true'],
+    ['rules/aku-core-rules.md', (b) => b.replace('alwaysApply: true', 'alwaysApply: false'), 'must preserve true'],
     ['rules/aku-code-convention-rules.md', (b) => b.replace('**/*.cs', '**/*.txt'), 'must preserve **/*.cs'],
     ['rules/aku-mcp-guard.md', (b) => b.replace('scope: [tool:edit, tool:write]', 'scope: [tool:edit]'), 'must preserve tool:write'],
-    ['tiers/concurrent/rules/aku-session-commit-rules.md', (b) => b.replace(/^condition:.*$/m, 'condition: ["safe"]'), 'must preserve git']
+    ['tiers/luna/rules/aku-luna-rules.md', (b) => b.replace(/^globs:.*$/m, 'globs: "**/*.js"'), 'must preserve **/*.cs']
   ];
   for (const [rel, mutate, expected] of cases) falsify(root, rel, mutate, expected);
 }));

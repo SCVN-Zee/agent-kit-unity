@@ -1,0 +1,116 @@
+name: Release beta
+
+on:
+  push:
+    tags:
+      - 'v*-beta.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-beta-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate canonical repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REPOSITORY" != "SCVN-Zee/agent-kit-unity" ]; then
+            echo "release refused outside SCVN-Zee/agent-kit-unity" >&2
+            exit 1
+          fi
+
+      - name: Validate beta tag and package versions
+        run: node scripts/build-release.cjs "$GITHUB_REF_NAME" --channel beta --validate-only
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install development dependencies
+        run: npm ci
+
+      - name: Verify repository
+        run: make check
+
+      - name: Build immutable release assets
+        run: node scripts/build-release.cjs "$GITHUB_REF_NAME" --channel beta
+
+      - name: Publish verified beta prerelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          find_release() {
+            gh api --paginate --slurp \
+              "repos/${GITHUB_REPOSITORY}/releases?per_page=100" > release-pages.json || return 1
+            node -e "
+              const fs = require('fs');
+              const tag = process.argv[1];
+              const matches = JSON.parse(fs.readFileSync('release-pages.json')).flat()
+                .filter((release) => release.tag_name === tag);
+              if (matches.length === 0) process.exit(4);
+              if (matches.length !== 1) throw Error('multiple releases found for ' + tag);
+              fs.writeFileSync('release-state.json', JSON.stringify(matches[0]));
+            " "$tag"
+          }
+          wait_for_release() {
+            local delay status
+            for delay in 0 1 2 4 8; do
+              if [ "$delay" -gt 0 ]; then sleep "$delay"; fi
+              if find_release; then return 0; else status=$?; fi
+              if [ "$status" -ne 4 ]; then return "$status"; fi
+            done
+            return 4
+          }
+          assert_draft() {
+            node -e "const s=require('./release-state.json'); if(!s.draft||!s.prerelease) throw Error('release must be a beta draft')"
+          }
+          if find_release; then
+            assert_draft
+          else
+            status=$?
+            if [ "$status" -ne 4 ]; then exit "$status"; fi
+            gh release create "$tag" --verify-tag --draft --prerelease --generate-notes \
+              --title "$tag"
+          fi
+          wait_for_release || { echo 'draft did not become visible before upload' >&2; exit 1; }
+          assert_draft
+
+          archive="dist/release/agent-kit-unity-${tag}.tgz"
+          gh release upload "$tag" \
+            dist/release/install.sh "$archive" dist/release/SHA256SUMS --clobber
+          gh release view "$tag" --json assets > release-assets.json
+          node - "$archive" <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const { createHash } = require('node:crypto');
+          const archive = process.argv[2];
+          const expected = new Map([
+            ['SHA256SUMS', 'dist/release/SHA256SUMS'],
+            ['install.sh', 'dist/release/install.sh'],
+            [path.basename(archive), archive]
+          ]);
+          const assets = JSON.parse(fs.readFileSync('release-assets.json')).assets;
+          if (assets.length !== expected.size) throw Error('release must contain exactly three assets');
+          for (const asset of assets) {
+            const file = expected.get(asset.name);
+            if (!file) throw Error(`unexpected release asset: ${asset.name}`);
+            const bytes = fs.readFileSync(file);
+            const digest = `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+            if (asset.digest !== digest || asset.size !== bytes.length) throw Error(`asset read-back mismatch: ${asset.name}`);
+            expected.delete(asset.name);
+          }
+          if (expected.size) throw Error(`missing release assets: ${[...expected.keys()].join(', ')}`);
+          NODE
+          gh release edit "$tag" --draft=false --prerelease=true

@@ -2,10 +2,9 @@
  * docs-facts.js — derive the kit's real counts from source.
  *
  * Every fact here is computed, never written down. That is the whole point:
- * `docs/codebase-summary.md` claimed 276 tools for months because the number was
- * typed into prose once (it was the OLD unity-mcp-pro server's count) and nothing
- * ever re-derived it. A count that lives in two places drifts; a count that lives
- * in one place and is read cannot.
+ * a hand-typed count once sat in prose for months after the real number had
+ * moved on, and nothing re-derived it. A count that lives in two places
+ * drifts; a count that lives in one place and is read cannot.
  *
  * Consumed by scripts/lint-docs-counts.cjs.
  */
@@ -13,9 +12,6 @@
 const fs = require('fs');
 const path = require('path');
 
-function readJson(p) {
-  return JSON.parse(fs.readFileSync(p, 'utf8'));
-}
 
 /** Entries of `dir` matching `pred`, or [] when the dir is absent. */
 function entries(dir, pred) {
@@ -43,23 +39,9 @@ function componentInventory(root) {
 }
 
 function deriveFacts(root) {
-  const tools = readJson(path.join(root, 'snapshots/mcp-tools.json'));
-  const prompts = readJson(path.join(root, 'snapshots/mcp-prompts.json'));
-
   const inventory = componentInventory(root);
-  const sourceCounts = tools.sourceCounts || {};
-
   return {
     inventory,
-    tools: {
-      total: tools.count,
-      core: sourceCounts.core,
-      bySource: sourceCounts
-    },
-    prompts: {
-      total: prompts.count,
-      enabled: prompts.enabledCount
-    },
     counts: {
       skills: inventory.skills.length,
       rules: inventory.rules.length

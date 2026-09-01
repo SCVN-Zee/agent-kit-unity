@@ -9,6 +9,10 @@ Animator Controller / AnimationClip work through the connected Unity MCP's anima
 
 > **Bind each capability in this skill to the Unity MCP tools already in your in-context tool list** — match the capability (create a controller, batch animator edits, read the graph, patch a component, run an editor-side C# snippet), not a hardcoded name; do not call a tool-introspection command to "discover" them. If no tool matches, do it in the Editor or via a committed-state `git` op rather than editing the `.controller` / `.anim` file directly.
 
+**Channel.** Capabilities below are transport-neutral. Resolve the transport per `rule://aku-mcp-policy`'s ladder + table: the Unity CLI (Pipeline) where the table marks the family CLI and detection passes; else the connected Unity MCP; else the Editor or a committed-state `git` op; if no channel is available, pause. On a CLI-resolved channel, the Roslyn fallback recipes in `FALLBACK_RECIPES.md` map to the Pipeline `eval` / `eval_file` commands (editor- and runtime-side) — verify spellings via `unity list` at use.
+
+**CLI recipes (Pipeline; `unity command` + args `--param value` using schema names).** Reads (proven-run 2026-08-30: `get_animation_clip --clip <assetPath>` returns bindings + curve metadata; error-path verified: a bad ref fails with a parameter-validation message): `get_animator_controller --controller <assetPath>` (verify-at-use). Writes (surface-verified; verify via `unity command` listing at use): `create_animator_controller`, `create_animation_clip`, `add_animator_layer`, `add_animator_parameter`, `add_animator_state`, `add_animator_transition` — one call per op, same ordering discipline as the batched MCP edit (parameters before states before transitions). Component wiring stays scene-side (`skill://aku-scene` recipes).
+
 **The intelligence here is build order and edge wiring, not any single tool call.** Creating a controller produces an **empty** one. States without transitions are unreachable, so an agent that stops after `AddState` finds nothing plays — and reaches for `animator.Play("Attack")` to force it. That call is the *symptom*; the missing transition is the *defect*. This skill exists to make the graph correct so nothing needs forcing.
 
 Sub-files:
@@ -66,4 +70,3 @@ The batched animator edit does not abort on error — per-modification failures 
 - `rule://aku-mcp-policy` — serialized-asset safety and direct domain routing; `.controller` / `.anim` mutations use the connected Unity MCP rather than direct edits.
 - `skill://aku-asset-conventions` — `C_*.controller` / `A_*.anim` prefixes and `Animation/AnimatorControllers/` layout.
 - `skill://aku-scene` — wiring `runtimeAnimatorController` onto a scene object or prefab instance.
-- `docs/MCP_CATALOG.md` (repo reference, illustrative) — full example catalog (animation / animator sections); bind at runtime to your in-context tool list.

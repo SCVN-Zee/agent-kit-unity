@@ -20,16 +20,7 @@ box you cannot miss.
 [SerializeField] private Animator _animator;
 ```
 
-`[Required]` takes its **own bracket on its own line**, directly above `[SerializeField]`. It is the
-highest-frequency attribute under this rule and the one a Luna playable target must guard on every ref — the
-own-bracket shape makes that guard a 2-line insert (`rule://aku-luna-rules`) instead of surgery on the bracket:
-
-```csharp
-#if UNITY_EDITOR && ODIN_INSPECTOR
-[Required]
-#endif
-[SerializeField] private Animator _animator;
-```
+`[Required]` takes its **own bracket on its own line**, directly above `[SerializeField]`. Keep the validation attribute independent from the serialized field.
 
 Other Odin attrs keep their combined form (`[SerializeField, LabelText("Interval (s)")]`). Only `[Required]` earns the
 dedicated line.
@@ -71,12 +62,9 @@ A prefab **asset** legitimately has empty scene refs until something instances i
 every such prefab and trains people to ignore the box.
 
 ```csharp
-#if UNITY_EDITOR && ODIN_INSPECTOR          // Luna playable only
 [RequiredIn(PrefabKind.InstanceInScene)]
-#endif
 [SerializeField] private Camera _mainCamera;
 ```
-
 Source alone rarely reveals that a ref is scene-instance-wired. Expected path: write `[Required]` first, downgrade to
 `[RequiredIn]` when the red box appears on the prefab asset. That is the workflow, not a failure.
 
@@ -93,7 +81,7 @@ fires on a collection — `[Required]` there is silent decoration, not validatio
 [SerializeField] private Transform[] _waypoints;
 ```
 
-`[ValidateInput]` names a member, so `skill://aku-odin/ODIN_ATTRIBUTES.md` **§7 applies**: keep `HasEntries`
+`[ValidateInput]` names a member, so `skill://aku-odin/ODIN_ATTRIBUTES.md` **§6 applies**: keep `HasEntries`
 compiled in every build and guard only its body.
 
 Advisory rather than mandatory — the predicate route costs real complexity for a case that is rarer than a plain ref.
@@ -121,9 +109,9 @@ The Inspector error box ships with **Odin Inspector**. Scanning a whole project 
 
 ## Cross-references
 
-- `skill://aku-odin/ODIN_ATTRIBUTES.md` — the Odin presence gate (§1), the attr mapping tables, and §7's
+- `skill://aku-odin/ODIN_ATTRIBUTES.md` — the Odin presence gate (§1), the attr mapping tables, and §6's
   always-compiled-member rule that §6 above depends on
 - [`REFERENCE_WIRING.md`](REFERENCE_WIRING.md) — how scene refs are acquired; §7 there is the argument this file extends
 - [`BOUNDED_DOMAIN_FIELDS.md`](BOUNDED_DOMAIN_FIELDS.md) — owns the `string`-with-a-finite-value-set row above
-- `rule://aku-luna-rules` — the editor-strip guard whose bracket mechanic drives §2's shape
+- Target-specific editor-only attribute guards belong to the target's own build rule.
 - `rule://aku-code-convention-rules` — automatic bridge into this authoritative skill

@@ -4,8 +4,7 @@ Adapted from Luna Toolkit's `LocomotionMotor`: its 21 serialized fields form sev
 `Input`, `Movement`, `Rotation`, `Jump`, `Slope`, `Collider`, and `Debug`. This shortened example intentionally shows
 representative fields from every domain; it does not claim to reproduce all 21 fields or runtime logic.
 
-The decoration guards shown are the Luna-playable form. Outside Luna, Odin cosmetic attributes do not need guards;
-follow [`ODIN_ATTRIBUTES.md`](../ODIN_ATTRIBUTES.md) §6 and `rule://aku-luna-rules`.
+These decoration guards are the Luna-playable form. Apply them to runtime-transpiled components; generic Odin policy remains in `skill://aku-odin/ODIN_ATTRIBUTES.md`, and the guard contract is enforced by `rule://aku-luna-rules`.
 
 ```csharp
 #if UNITY_EDITOR && ODIN_INSPECTOR

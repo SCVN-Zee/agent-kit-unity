@@ -7,6 +7,10 @@ description: "Use when the target is a named Unity prefab asset: open or edit it
 
 Prefab **asset** work through the connected Unity MCP. Bind each capability to the Unity MCP tools already surfaced in your in-context tool list — match the capability, not a hardcoded name; if none matches, do it in the Editor or via a committed-state `git` op. For when you already know the target is a specific `.prefab` **asset** and want to act on the asset itself — *not* when editing a scene object whose prefab status is unknown.
 
+**Channel.** Capabilities below are transport-neutral. Resolve the transport per `rule://aku-mcp-policy`'s ladder + table: the Unity CLI (Pipeline) where the table marks the family CLI and detection passes; else the connected Unity MCP; else the Editor or a committed-state `git` op; if no channel is available, pause.
+
+**CLI recipes (Pipeline; `unity command` + args `--param value` using schema names).** Discovery (proven-run 2026-08-30): `find_assets --type GameObject --name <substr>` locates prefab assets (`assetPath`/`guid`/`globalId`). Lifecycle writes (surface-verified; verify via `unity command` listing at use): `create_prefab`, `instantiate_prefab`, `create_prefab_variant`, `apply_prefab_overrides`, `revert_prefab_overrides`, `save_prefab_contents` (prefab-stage save), `delete_asset --confirm true` (destructive-gated). After any stage edit, verify propagation with `get_scene_hierarchy` (`skill://aku-scene` owns the instance-tier decision).
+
 ## Scope gate (read first)
 
 Use `skill://aku-prefab` only when **the target is a named prefab asset** (`@Assets/.../X.prefab`). Then no scene-instance detection is needed — act on the asset directly via the prefab stage.
@@ -50,4 +54,3 @@ Sub-files:
 
 - `skill://aku-scene` — scene / hierarchy / component + the prefab-**instance** apply tiers (scene-override / apply-to-source / nested-child) + the coarse-apply audit. The instance→source decision lives there, **not** here.
 - `skill://aku-asset-conventions` — asset-naming prefixes + project layout (`PROJECT_LAYOUT.md`); prefabs carry no name prefix (the `.prefab` extension self-identifies).
-- `docs/MCP_CATALOG.md` (repo reference, illustrative) — the full example catalog (Assets section, prefab-* family); bind at runtime to your in-context tool list.

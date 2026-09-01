@@ -140,4 +140,4 @@ namespace <GameName>.<Variant>
 - [`STRUCTURE.md`](../STRUCTURE.md) — full structure rules
 - [`NAMING.md`](../NAMING.md) — naming conventions
 - [`setup-refs-pattern.md`](setup-refs-pattern.md) — editor-only `Setup Refs` auto-wiring
-- C# authoring/perf → the installed C#-authoring skill (per `rule://aku-capability-routing`); mobile-perf baseline in the sticky `rule://aku-engine-rules`
+- Mobile-performance baseline → the sticky `rule://aku-core-rules`

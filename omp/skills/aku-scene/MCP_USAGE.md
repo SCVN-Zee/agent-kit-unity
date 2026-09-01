@@ -2,7 +2,7 @@
 
 The ordered capability sequences for scene / hierarchy / component / prefab-instance work, with param sketches.
 
-> **Binding instruction.** Bind each capability below to the Unity MCP tools already surfaced in your in-context tool list — match the capability, not a hardcoded name. If none matches, do it in the Editor or via a committed-state `git` op. The full illustrative tool catalog lives in `docs/MCP_CATALOG.md` (repo reference, not shipped).
+> **Binding instruction.** Bind each capability below to the Unity MCP tools already surfaced in your in-context tool list — match the capability, not a hardcoded name. If none matches, do it in the Editor or via a committed-state `git` op.
 
 > Modify capabilities support three surfaces — **`diff`**, **`pathPatches`**, **`jsonPatch`**. Reads accept **`paths`** and **`viewQuery`** to slice the payload and save tokens.
 
@@ -59,7 +59,7 @@ Kept here: prefab-**instance** detection + the apply tiers. **Asset-lifecycle** 
 | Find a method by reflection | type / method filters | Locate an Editor API by name before invoking it. |
 | Call a method by reflection | type, method, args | Scalpel for ops with no typed capability. |
 | Run an editor-side C# snippet | C# snippet | One-off Roslyn-compiled execution; ends with `return <expr>;`. |
-| Author/edit a permanent editor helper | path, contents | Land a helper under `Assets/Editor/`. Script authoring is out of this kit's scope → route per `rule://aku-capability-routing`. |
+| Author/edit a permanent editor helper | path, contents | Land a helper under `Assets/Editor/`. |
 | Invoke a menu command by reflection (`EditorApplication.ExecuteMenuItem`) | menu path | e.g. `"GameObject/Align With View"`. |
 | Refresh the asset DB | — | Only after **external** file changes; in-Editor changes via the capabilities above don't need it. |
 

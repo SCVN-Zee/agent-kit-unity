@@ -11,21 +11,21 @@ const { sandbox, ship, omp, readLock, sha, cleanup } = require('./helpers/omp-sa
 
 const KIT_VERSION = require('../../package.json').version;
 
-test('fresh install writes the .omp tree (incl. a non-.md skill file) + a valid lock', () => {
+test('fresh default install writes the .omp tree + a valid lock, without Luna skills', () => {
   const t = sandbox();
   try {
     const r = ship(t);
     assert.equal(r.code, 0, r.out);
-    for (const rel of ['AGENTS.md', 'rules/aku-engine-rules.md', 'rules/aku-mcp-policy.md',
-      'skills/aku-scene/SKILL.md', 'skills/aku-scene/CINEMACHINE.md',
-      'skills/aku-luna-build-check/scripts/luna-build-settings.cjs', 'aku-lock.json']) {
+    for (const rel of ['AGENTS.md', 'rules/aku-core-rules.md', 'rules/aku-mcp-policy.md',
+      'skills/aku-scene/SKILL.md', 'skills/aku-scene/CINEMACHINE.md', 'aku-lock.json']) {
       assert.ok(fs.existsSync(omp(t, rel)), `missing ${rel}`);
     }
+    assert.ok(!fs.existsSync(omp(t, 'skills/aku-luna-build-check')), 'luna skill absent from default install');
+    assert.ok(!fs.existsSync(omp(t, 'skills/aku-luna-code-review')), 'luna review skill absent from default install');
     const lock = readLock(t);
     assert.equal(lock.lockVersion, 1);
     assert.equal(lock.kitVersion, KIT_VERSION);
-    const script = 'skills/aku-luna-build-check/scripts/luna-build-settings.cjs';
-    assert.equal(lock.files[script].hash, sha(fs.readFileSync(omp(t, script))));
+    assert.equal(Object.keys(lock.files).filter((rel) => rel.includes('aku-luna-')).length, 0, 'no luna lock entries');
   } finally { cleanup(t); }
 });
 
@@ -79,7 +79,7 @@ test('update-available by hash: stale disk+lock → --check exit 2, --update re-
     ship(t);
     // Simulate an upstream change: rewrite disk to OLD bytes and point the lock
     // at those same old bytes, so source ≠ lock == disk → an available update.
-    const rel = 'rules/aku-engine-rules.md';
+    const rel = 'rules/aku-core-rules.md';
     const old = Buffer.from('OLD RULES CONTENT\n');
     fs.writeFileSync(omp(t, rel), old);
     const lock = readLock(t);
@@ -88,7 +88,7 @@ test('update-available by hash: stale disk+lock → --check exit 2, --update re-
 
     const chk = ship(t, ['--check']);
     assert.equal(chk.code, 2, chk.out);
-    assert.match(chk.out, /aku-engine-rules\.md/);
+    assert.match(chk.out, /aku-core-rules\.md/);
 
     assert.equal(ship(t, ['--update']).code, 0);
     assert.equal(ship(t, ['--check']).code, 0, 'update should re-sync to source');
@@ -162,28 +162,3 @@ test('removed generic router prunes clean siblings and preserves edited bytes', 
   } finally { cleanup(t); }
 });
 
-test('upgrade from the pre-move layout: managed top-level RULES.md is pruned, relocated rule installs', () => {
-  const t = sandbox();
-  try {
-    ship(t);
-    // Simulate an install made BEFORE RULES.md moved into rules/: the old
-    // top-level file is on disk and in the lock, and the relocated rule absent.
-    const legacy = Buffer.from('# Unity Rules (sticky)\nlegacy body\n');
-    fs.writeFileSync(omp(t, 'RULES.md'), legacy);
-    fs.unlinkSync(omp(t, 'rules/aku-engine-rules.md'));
-    const lock = readLock(t);
-    const now = new Date().toISOString();
-    lock.files['RULES.md'] = { hash: sha(legacy), installedAt: now, updatedAt: now };
-    delete lock.files['rules/aku-engine-rules.md'];
-    fs.writeFileSync(omp(t, 'aku-lock.json'), JSON.stringify(lock, null, 2) + '\n');
-
-    const r = ship(t, ['--update']);
-    assert.equal(r.code, 0, r.out);
-    assert.ok(!fs.existsSync(omp(t, 'RULES.md')), 'legacy top-level RULES.md pruned (I==L)');
-    assert.ok(fs.existsSync(omp(t, 'rules/aku-engine-rules.md')), 'relocated rule installed');
-    const after = readLock(t);
-    assert.ok(!after.files['RULES.md'], 'lock no longer records RULES.md');
-    assert.ok(after.files['rules/aku-engine-rules.md'], 'lock records the relocated rule');
-    assert.equal(ship(t, ['--check']).code, 0, 'in sync after upgrade');
-  } finally { cleanup(t); }
-});

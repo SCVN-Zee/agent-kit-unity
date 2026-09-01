@@ -7,4 +7,4 @@ globs: ["**/*.cs"]
 
 Before policy lookup, authoring, editing, or refactoring Unity C#, MUST read and apply `skill://aku-code-conventions`. Report-only file, diff, commit, PR, or completed-feature review MUST enter through `skill://aku-code-review`, which loads code conventions as its convention lens.
 
-Engine-wide invariants remain in `rule://aku-engine-rules`. Inspector decoration and tooling belong to `skill://aku-odin`; asset naming and organization belong to `skill://aku-asset-conventions`.
+Engine-wide invariants remain in `rule://aku-core-rules`. Inspector decoration and tooling belong to `skill://aku-odin`; asset naming and organization belong to `skill://aku-asset-conventions`.

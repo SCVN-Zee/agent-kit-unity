@@ -12,7 +12,6 @@
  *                  playable build. playable = .omp/aku-project.json
  *                  {lunaPlayable:<bool>} when set (team-shared marker wins),
  *                  else the current branch name contains "playable".
- *  - concurrent  : .omp/aku-project.json {concurrentSessions:true}.
  *
  * Reads are guarded; a bare/borked target degrades to [] and never throws.
  */
@@ -81,7 +80,6 @@ function detect(target, opts = {}) {
   const tiers = [];
   if (isDir(path.join(target, 'Assets', 'Supercent'))) tiers.push('supercent');
   if (hasLunaPackage(target) && isPlayable(target, marker, opts.branch)) tiers.push('luna');
-  if (marker.concurrentSessions === true) tiers.push('concurrent');
   return tiers.sort();
 }
 

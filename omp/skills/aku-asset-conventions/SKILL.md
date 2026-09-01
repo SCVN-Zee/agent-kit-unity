@@ -9,7 +9,7 @@ Sub-files:
 
 | File | Purpose |
 | --- | --- |
-| [`PROJECT_LAYOUT.md`](PROJECT_LAYOUT.md) | Unity content tree with the Supercent playable-ad reference and adaptation guidance for other projects. |
+| [`PROJECT_LAYOUT.md`](PROJECT_LAYOUT.md) | Common Unity project content tree. |
 | [`ASSET_PREFIXES.md`](ASSET_PREFIXES.md) | Asset prefix table, texture map suffixes, importer alignment, config asset naming, rationale, and edge cases. |
 | [`HIERARCHY_NAMING.md`](HIERARCHY_NAMING.md) | UI/VFX GameObject prefixes inside scene and prefab hierarchies. |
 
@@ -18,7 +18,7 @@ C# identifiers, class structure, serialized fields, reference wiring, and runtim
 ## When to load
 
 - Naming a scene, sprite, texture, material, shader, animation, controller, audio clip, or config asset.
-- Choosing folders for Unity content or laying out a new playable variant.
+- Choosing folders for Unity content or laying out a new project.
 - Selecting texture/sprite importer intent from an asset's semantic role.
 - Naming UI or VFX GameObjects inside a scene or prefab hierarchy.
 - Reviewing Unity content organization or asset-name compliance.
@@ -35,7 +35,7 @@ This skill defines policy only. Use `skill://aku-scene` for scene and instance c
 ## Workflow position
 
 ```text
-rule://aku-asset-convention-rules (compact automatic policy)
+rule://aku-asset-convention-rules (automatic activation bridge)
   → skill://aku-asset-conventions (full naming and organization rules)
   → matching connected Unity MCP capability (other operations)
   → skill://aku-scene | skill://aku-prefab | skill://aku-animator (asset-specific operations)
@@ -44,7 +44,7 @@ rule://aku-asset-convention-rules (compact automatic policy)
 ## Cross-references
 
 - `skill://aku-code-conventions` — Unity C# naming, structure, fields, and reference wiring
-- `rule://aku-asset-convention-rules` — compact asset convention rulebook
+- `rule://aku-asset-convention-rules` — automatic activation bridge to this skill
 - `rule://aku-sc-rules` — Supercent-specific playable layout overlay
 - `skill://aku-scene` — scene and prefab-instance operations
 - `skill://aku-prefab` — prefab-asset operations

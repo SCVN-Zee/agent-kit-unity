@@ -71,18 +71,11 @@ test('marker lunaPlayable:false beats a playable branch → no luna', () => {
   assert.deepEqual(detect(root, { branch: 'playable/x' }), []);
 });
 
-test('marker concurrentSessions:true → concurrent', () => {
-  const root = tmp();
-  unity(root);
-  write(root, '.omp/aku-project.json', JSON.stringify({ concurrentSessions: true }));
-  assert.deepEqual(detect(root, { branch: 'main' }), ['concurrent']);
-});
-
-test('all three markers combine and sort', () => {
+test('markers combine and sort', () => {
   const root = tmp();
   unity(root);
   fs.mkdirSync(path.join(root, 'Assets/Supercent'), { recursive: true });
   write(root, 'luna.json', '{}');
-  write(root, '.omp/aku-project.json', JSON.stringify({ lunaPlayable: true, concurrentSessions: true }));
-  assert.deepEqual(detect(root, { branch: 'main' }), ['concurrent', 'luna', 'supercent']);
+  write(root, '.omp/aku-project.json', JSON.stringify({ lunaPlayable: true }));
+  assert.deepEqual(detect(root, { branch: 'main' }), ['luna', 'supercent']);
 });

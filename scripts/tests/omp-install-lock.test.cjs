@@ -53,7 +53,7 @@ test('write → read round-trips and sorts keys stably', () => {
     kitVersion: '1.0.0-rc.1',
     tiers: ['supercent'],
     entries: {
-      'rules/aku-engine-rules.md': { hash: 'sha256:bb' },
+      'rules/aku-core-rules.md': { hash: 'sha256:bb' },
       'AGENTS.md': { hash: 'sha256:aa' },
       'rules/aku-sc-rules.md': { hash: 'sha256:cc', tier: 'supercent' }
     },
@@ -64,7 +64,7 @@ test('write → read round-trips and sorts keys stably', () => {
   const back = lock.read(dir);
   assert.equal(back.kitVersion, '1.0.0-rc.1');
   assert.deepEqual(back.tiers, ['supercent']);
-  assert.deepEqual(Object.keys(back.files), ['AGENTS.md', 'rules/aku-engine-rules.md', 'rules/aku-sc-rules.md']);
+  assert.deepEqual(Object.keys(back.files), ['AGENTS.md', 'rules/aku-core-rules.md', 'rules/aku-sc-rules.md']);
   assert.equal(back.files['rules/aku-sc-rules.md'].tier, 'supercent');
 });
 

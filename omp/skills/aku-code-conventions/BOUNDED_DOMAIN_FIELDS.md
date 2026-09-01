@@ -131,7 +131,7 @@ editor script is the normal answer.
 
 ## Cross-references
 
-- `skill://aku-odin/ODIN_ATTRIBUTES.md` — attribute semantics, the presence gate, and §7's all-targets
+- `skill://aku-odin/ODIN_ATTRIBUTES.md` — attribute semantics, the presence gate, and §6's all-targets
   player-build trap for attributes that name a member (`[ValueDropdown]` is one)
 - [`examples/bounded-domain-fields.md`](examples/bounded-domain-fields.md) — every provider recipe
 - [`examples/identifier-pickers.md`](examples/identifier-pickers.md) — Unity layer and Animator identifier recipes

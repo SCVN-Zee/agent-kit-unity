@@ -4,7 +4,7 @@ Use Odin to reduce authoring mistakes and navigation cost, not to decorate every
 layout and interaction to choose**. Attribute syntax stays in [`ODIN_ATTRIBUTES.md`](ODIN_ATTRIBUTES.md); editor
 windows and actions stay in [`EDITOR_TOOLING.md`](EDITOR_TOOLING.md).
 
-The Odin presence gate still applies. On Luna playable targets, apply `rule://aku-luna-rules` to runtime fields.
+The Odin presence gate still applies. Target-specific runtime-field constraints belong to the installed build rule.
 
 ## 1. Start from the author's task
 
@@ -44,10 +44,7 @@ normally work in one domain at a time.
 - Avoid nested tabs. If tab labels or nested groups stop fitting, consolidate domains or use a menu-tree window.
 - Test normal and narrow Inspector widths; never assume the author's dock width.
 
-`LocomotionMotor` is the canonical real case: 21 serialized fields across seven sibling tabs — `Input`, `Movement`,
-`Rotation`, `Jump`, `Slope`, `Collider`, and `Debug`. See
-[`examples/tabbed-component.md`](examples/tabbed-component.md).
-
+Choose tab domains from the component's authoring tasks; keep the tab set shallow and sibling-oriented.
 ## 4. Hide, disable, read-only, or validate
 
 | State | Presentation | Reason |
@@ -79,7 +76,7 @@ Tooltips explain ownership, units, side effects, or non-obvious consequences. Th
 
 Never perform reflection scans, `AssetDatabase` searches, list allocation, or texture creation from a displayed
 getter, condition, dropdown provider, or repaint callback. Cache immutable choices and invalidate them explicitly.
-Keep members named by attributes compiled in every applicable build; see `ODIN_ATTRIBUTES.md` §7.
+Keep members named by attributes compiled in every applicable build; see `ODIN_ATTRIBUTES.md` §6.
 
 Prefer vertical flow. A dense `HorizontalGroup` or nested layout copied from a wide custom window can become
 unusable in a docked Inspector.
