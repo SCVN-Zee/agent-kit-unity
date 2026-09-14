@@ -87,7 +87,7 @@ Manual Inspector dragging is tedious and error-prone for many refs. The sanction
 - `Reset()` wires what exists when the component is added; re-run **Setup Refs** from the Inspector after building children.
 - Do **not** auto-wire in `OnValidate` (runs on every inspector change/recompile, API-restricted).
 
-**Limits ("if possible"):** covers same-GameObject, children, and named scene objects. Cannot wire runtime-`Instantiate`d objects (§5 exception applies) or cross-scene refs. For a **prefab instance**, run Setup Refs on the prefab asset (see `skill://aku-prefab`) so values live on the source, not as instance overrides.
+**Limits ("if possible"):** covers same-GameObject, children, and named scene objects. Cannot wire runtime-`Instantiate`d objects (§5 exception applies) or cross-scene refs. For a **prefab instance**, run Setup Refs on the prefab asset so values live on the source, not as instance overrides.
 
 ## 5. Only allowed exception — runtime-instantiated objects
 

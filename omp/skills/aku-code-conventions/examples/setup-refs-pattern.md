@@ -86,7 +86,7 @@ namespace <GameName>.<Variant>
 
 - `Reset()` wires what exists when the component is added; re-run **Setup Refs** after building children.
 - Does NOT cover runtime-`Instantiate`d objects (`REFERENCE_WIRING.md` §5 exception) or cross-scene refs.
-- For a prefab **instance**, run Setup Refs on the prefab asset (see `skill://aku-prefab`) so values live on the source.
+- For a prefab **instance**, run Setup Refs on the prefab asset so values live on the source.
 - Never auto-wire in `OnValidate` (runs constantly, API-restricted).
 - Child lookup by name (`transform.Find("Muzzle")`) is edit-time only — a rename surfaces as an empty slot before Play; prefer typed `GetComponentInChildren<T>()` where unambiguous.
 

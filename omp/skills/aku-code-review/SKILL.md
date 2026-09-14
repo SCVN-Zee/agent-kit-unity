@@ -60,8 +60,6 @@ Surface extensions (reviewed through the lenses above): **shaders/compute** → 
 
 Bind each capability to the Unity MCP tools already surfaced in your in-context tool list — match the capability, not a hardcoded name. If none matches, read via the Editor. Never hand-edit a serialized asset file.
 
-**Channel.** Verification reads are CLI-first where the ladder passes (`rule://aku-mcp-policy`): console read via `unity command console --tail <n>` (proven-run 2026-08-30); tests inventory via `unity command list_tests --mode EditMode` (proven-run 2026-08-30); asset lookups via `find_assets` (proven-run 2026-08-30). **Test execution is MCP-primary in-session** — run via MCP `tests-run` (save the scene first; a dirty scene aborts the runner); `unity command run_tests` + `test_status` are verify-at-use alternatives, not the default route. Headless `unity test --mode EditMode --report-format nunit` (spellings help-verified) applies only with the project closed in the interactive Editor. Other verification reads fall back to the MCP console-read capability; terminal fallback: read via the Editor.
-
 No profiler step — perf findings are reasoned statically (kept light by design).
 
 ## Report-only
@@ -107,6 +105,6 @@ Flag a finding once, under its most specific lens. If a finding is also a conven
 
 ## Workflow position
 
-**Typically follows:** the focused Unity domain workflow or implementation pass used for the change.
+**Typically follows:** the implementation pass used for the change.
 **Typically precedes:** shipping or release.
 **Related:** the installed generic code-review skill (generic protocol it layers on), `/skill:aku-code-conventions` and `/skill:aku-asset-conventions` (convention lenses). Run this review inline — the main agent walks the protocol directly.

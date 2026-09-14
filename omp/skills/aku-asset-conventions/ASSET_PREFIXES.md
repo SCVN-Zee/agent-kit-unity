@@ -135,4 +135,3 @@ Configs/
 
 - [`PROJECT_LAYOUT.md`](PROJECT_LAYOUT.md) — folder tree
 - `skill://aku-code-conventions/NAMING.md` — C# naming (separate from asset naming)
-- `skill://aku-scene` — MCP ops for asset creation

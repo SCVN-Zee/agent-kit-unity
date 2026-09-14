@@ -27,8 +27,8 @@ function removeTarget(dest) {
 }
 
 // Dot-prefixed and *beside* the target rather than suffixed onto it: a crashed
-// run leaves `skills/.aku-tmp.123.aku-scene/`, which no skill scanner picks up,
-// where `skills/aku-scene.aku-tmp.123/` would look like a second aku-* skill.
+// run leaves `skills/.aku-tmp.123.aku-code-review/`, which no skill scanner picks up,
+// where `skills/aku-code-review.aku-tmp.123/` would look like a second aku-* skill.
 function tmpFor(dest) {
   return path.join(path.dirname(dest), `${TMP_PREFIX}${process.pid}.${path.basename(dest)}`);
 }

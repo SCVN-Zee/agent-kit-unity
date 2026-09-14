@@ -83,4 +83,4 @@ If all gates pass: report the verdict and list any advisory deviations for the u
 ## Workflow position
 
 **Typically precedes:** a Luna build (Cmd+E export), shipping, or release.
-**Related:** `skill://aku-luna-code-review` (compatibility lens — complementary) and the focused Unity skill that owns the changed scene, prefab, or Animator asset.
+**Related:** `skill://aku-luna-code-review` (compatibility lens — complementary).

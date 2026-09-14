@@ -1,6 +1,6 @@
 # agent-kit-unity — Oh My Pi (OMP) kit
 
-The OMP-native form of the agent-kit-unity Unity conventions + Editor-routing kit. Unlike the Claude Code / Codex builds (installed globally, gated by SessionStart/UserPromptSubmit hooks), this build is **project-scoped**: you drop it into a Unity repo's `.omp/` directory, so it activates only in that repo and stays silent everywhere else — no detection hooks needed.
+The OMP-native form of the agent-kit-unity Unity conventions kit. Unlike the retired Claude Code / Codex builds (installed globally, gated by SessionStart/UserPromptSubmit hooks), this build is **project-scoped**: you drop it into a Unity repo's `.omp/` directory, so it activates only in that repo and stays silent everywhere else — no detection hooks needed.
 
 ## Layout
 
@@ -8,12 +8,10 @@ The OMP-native form of the agent-kit-unity Unity conventions + Editor-routing ki
 omp/
   AGENTS.md                 # project background + tier-detection instructions (all Unity repos)
   rules/                    # base rules (all Unity repos)
-    aku-core-rules.md              # alwaysApply — sticky engine + MCP + serialize invariants
+    aku-core-rules.md              # alwaysApply — engine conventions + serialized Editor mutations
     aku-code-convention-rules.md   # rulebook (globs **/*.cs)
     aku-asset-convention-rules.md  # rulebook (asset globs)
-    aku-mcp-policy.md              # rulebook (full MCP routing policy)
-    aku-mcp-guard.md              # TTSR — aborts a raw edit/write of a corruptible Unity asset
-  skills/aku-*/             # 7 focused base Unity skills (SKILL.md + subfiles)
+  skills/aku-*/             # 5 focused base Unity skills (SKILL.md + subfiles)
   tiers/                    # opt-in overlays — copy a tier's rules + skills in only for matching repos
     supercent/rules/aku-sc-rules.md          # alwaysApply — [Dev] commit prefix + layout
     luna/rules/aku-luna-rules.md             # rulebook — editor-strip + authoring constraints (C#, assets)
@@ -26,11 +24,9 @@ omp/
 
 | Rule | OMP bucket | Trigger / cost |
 |------|-----------|----------------|
-| `aku-core-rules.md` | **Sticky always-apply** | Full body every prompt; survives long sessions. Hard engine + MCP + serialize invariants only. |
+| `aku-core-rules.md` | **Sticky always-apply** | Full body every prompt; engine conventions and serialized Editor mutations. |
 | `aku-code-convention-rules` | **Rulebook** | Name+desc listed; body pulled via `rule://` when editing `**/*.cs`. |
 | `aku-asset-convention-rules` | **Rulebook** | On-demand for asset work. |
-| `aku-mcp-policy` | **Rulebook** | Full policy, addressable via `rule://aku-mcp-policy`. |
-| `aku-mcp-guard` | **TTSR** | Fires on `edit`/`write` of `.prefab/.unity/.controller/.anim/.mat/.playable/.signal`; aborts the corrupting edit, redirects per the channel policy. |
 | `aku-sc-rules` (Supercent) | **Always-apply** | `[Dev]` commit prefix is a hard every-commit requirement. |
 | `aku-luna-rules` (Luna) | **Rulebook** | On-demand for Luna authoring on C#, Animator, prefab, scene, and material surfaces; loads `skill://aku-luna-conventions`. |
 
@@ -89,4 +85,3 @@ The supported consumer path is the checksum-verified release bootstrap above. It
 
 - **Discovery.** Native `.omp/` rules and skills are priority-100 for OMP. Skills are discovered one level under `.omp/skills/` as `<name>/SKILL.md`, addressable via `skill://aku-<name>` and `/skill:aku-<name>`.
 - **`aku-core-rules.md` is always sticky** and cannot self-gate — that is why this kit is project-scoped rather than user-global. Installing it at user scope would fire it on every project, Unity or not.
-- **TTSR fires once per session** by default (`repeatMode: once`): the guard warns on the first offending edit/command, then trusts you on a deliberate retry.

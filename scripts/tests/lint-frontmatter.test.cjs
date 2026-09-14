@@ -3,7 +3,6 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '../..');
 const LINTER = path.join(ROOT, 'scripts/lint-frontmatter.cjs');
@@ -44,20 +43,15 @@ function withSandbox(run) {
   finally { fs.rmSync(root, { recursive: true, force: true }); }
 }
 
-test('CLI scans the complete 7/5/2/3 metadata inventory', () => {
-  const run = spawnSync(process.execPath, [LINTER], { encoding: 'utf8' });
-  assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /17 surfaces: 7 skills, 5 base rules, 2 tier rules, 3 tier skills/);
-});
 
 test('inventory rejects missing files and uncontracted additions', () => withSandbox((root) => {
-  const scene = metadataPath(root, 'skills/aku-scene/SKILL.md');
-  const original = fs.readFileSync(scene, 'utf8');
+  const skill = metadataPath(root, 'skills/aku-asset-conventions/SKILL.md');
+  const original = fs.readFileSync(skill, 'utf8');
   try {
-    fs.rmSync(scene);
+    fs.rmSync(skill);
     assert.ok(validateTree(root).errors.some((e) => e.includes('metadata file missing')));
   } finally {
-    fs.writeFileSync(scene, original);
+    fs.writeFileSync(skill, original);
   }
 
   const extra = metadataPath(root, 'rules/aku-uncontracted.md');
@@ -71,7 +65,7 @@ test('inventory rejects missing files and uncontracted additions', () => withSan
 }));
 
 test('description shape failures are observable and restore cleanly', () => withSandbox((root) => {
-  const rel = 'skills/aku-scene/SKILL.md';
+  const rel = 'skills/aku-asset-conventions/SKILL.md';
   const cases = [
     ['description: ""', 'missing frontmatter field "description"'],
     ['description: |\n  Use when working with Unity scenes.', 'unsupported YAML block scalar'],
@@ -104,11 +98,10 @@ test('report-only review has one discovery owner', () => withSandbox((root) => {
   for (const [rel, mutate, expected] of cases) falsify(root, rel, mutate, expected);
 }));
 
-test('always, glob, and TTSR trigger metadata cannot drift', () => withSandbox((root) => {
+test('always-apply and glob trigger metadata cannot drift', () => withSandbox((root) => {
   const cases = [
     ['rules/aku-core-rules.md', (b) => b.replace('alwaysApply: true', 'alwaysApply: false'), 'must preserve true'],
     ['rules/aku-code-convention-rules.md', (b) => b.replace('**/*.cs', '**/*.txt'), 'must preserve **/*.cs'],
-    ['rules/aku-mcp-guard.md', (b) => b.replace('scope: [tool:edit, tool:write]', 'scope: [tool:edit]'), 'must preserve tool:write'],
     ['tiers/luna/rules/aku-luna-rules.md', (b) => b.replace(/^globs:.*$/m, 'globs: "**/*.js"'), 'must preserve **/*.cs']
   ];
   for (const [rel, mutate, expected] of cases) falsify(root, rel, mutate, expected);

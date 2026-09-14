@@ -38,10 +38,9 @@ a diff under `**/Playable*/`, or the prompt names Luna. If none of those hold, s
 3. **Load the lens** `skill://aku-luna-code-review/references/checklist-luna-compatibility.md`.
 4. **Tier 1 — source-static.** Read the changed `.cs`/`.shader` (diff, or read the in-Editor script); walk the
    Tier-1 tables + run the grep audit. Flag only real hazards, `file:line` + one-line Luna-safe fix.
-5. **Tier 2 — asset (read-only MCP, when the detection ladder finds a reachable Editor).** Run the automated checks; surface the
-   advisory ones as manual-inspect. No reachable channel (ladder fails: no live Editor, no connected MCP) → note `luna asset-tier: skipped (no reachable Editor)`.
+5. **Tier 2 — asset (read-only, when an Editor is reachable).** Run the automated checks; surface the
+   advisory ones as manual-inspect. No reachable Editor → note `luna asset-tier: skipped (no reachable Editor)`.
 6. **Verify** (Stage 2): read the console (Error filter); run tests (save dirty scenes first — a dirty scene aborts the test runner) if they cover the change. Read-only.
-   **Channel** (mirror of `skill://aku-code-review` Stage 2): verification reads are CLI-first where the ladder passes — `unity command console --tail <n>`, `list_tests --mode EditMode` (both proven-run 2026-08-30). **Test execution is MCP-primary in-session** via `tests-run`; `run_tests` + `test_status` are verify-at-use alternatives; headless `unity test` only with the project closed in the interactive Editor (spellings help-verified; re-verify at use). Other reads: MCP fallback when the CLI ladder fails. Terminal fallback: read via the Editor.
 
 Bind each capability to the Unity MCP tools already surfaced in your in-context tool list — match the capability, not a hardcoded name. If none matches, read via the Editor. Never hand-edit a serialized asset file.
 
@@ -71,7 +70,7 @@ If clean: `Luna Review: No issues found.`
 
 ## Workflow position
 
-**Typically follows:** the focused Unity domain workflow or implementation pass used on a Luna playable.
+**Typically follows:** the implementation pass used on a Luna playable.
 **Typically precedes:** shipping, release, or a Luna build (Cmd+E export).
 **Related:** `skill://aku-luna-build-check` (export build-settings tuning — complementary: this is *will-it-transpile*, that is *is-it-tuned*), `/skill:aku-code-review` (parent; this is its Lens 6 as a standalone entry), `/skill:aku-code-conventions`
 (convention lens). Run this review inline — the main agent walks the protocol directly.

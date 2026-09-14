@@ -179,7 +179,7 @@ private IEnumerable GetAnimatorStatePaths()
 }
 ```
 
-The state provider matches `skill://aku-animator`'s supported top-level state graph. A project using sub-state machines must
+The state provider covers top-level states only. A project using sub-state machines must
 recurse through child state machines rather than flatten duplicate names.
 
 ## Validation and no-Odin fallback

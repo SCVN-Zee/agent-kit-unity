@@ -2,7 +2,7 @@
 
 An Animator bug usually splits across two artifacts: C# that forces a state, and a controller graph with no usable edge. Reviewing either alone misses the cause. `Animator.Play("Attack")` may hide the missing transition, but it does not make normal gameplay wiring correct. This surface reads both.
 
-**Read-only.** Report; never mutate. Fixes route to the installed C#-authoring skill (C#) or `skill://aku-animator` (graph).
+**Read-only.** Report; never mutate. Fixes belong in a separate implementation pass.
 
 ## Capabilities (all read-only)
 
@@ -59,7 +59,7 @@ Hash caching is already covered by `checklist-serialization-wiring.md` (magic st
 
 - Standard finding format, plus the controller asset path and layer/state names.
 - Tag lens `animator`.
-- **Graph fixes** → `skill://aku-animator`. **C# fixes** → the installed C#-authoring skill. Never fix either here.
+- **Graph and C# fixes** belong in a separate implementation pass. Never fix either here.
 - Editor not open (a health probe fails) → report `animator-review: skipped (no live Editor)`; finding 5 remains checkable from the diff alone. Direct-state calls may be noted as unverified until the graph is inspected.
 
 ## Suppress

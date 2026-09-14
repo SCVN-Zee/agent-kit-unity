@@ -2,7 +2,7 @@
 
 GameObjects in a hierarchy use **prefixes** to flag their primary UI/effect role at a glance. This applies to object (transform) names in **both scenes and prefab contents** — a prefab is just a saved hierarchy, so the same rules hold inside it. Apply PascalCase after the prefix underscore (e.g. `Canvas_HUD`, `BTN_Play`).
 
-The prefix names the **GameObject**, identified by its primary component — not the component itself, and **not** the asset file. Prefab *asset files* stay unprefixed (the `.prefab` extension self-identifies; see [`ASSET_PREFIXES.md`](ASSET_PREFIXES.md) and `skill://aku-prefab`).
+The prefix names the **GameObject**, identified by its primary component — not the component itself, and **not** the asset file. Prefab *asset files* stay unprefixed (the `.prefab` extension self-identifies; see [`ASSET_PREFIXES.md`](ASSET_PREFIXES.md)).
 
 ## 1. UI / VFX prefix table
 
@@ -36,5 +36,3 @@ Other UGUI/effect object types may take stable, project-defined prefixes (e.g. `
 - [`ASSET_PREFIXES.md`](ASSET_PREFIXES.md) — asset **file** prefixes (different rules; e.g. `SP_`, `T_`, `M_`)
 - `skill://aku-code-conventions/NAMING.md` — C# code naming (separate from object naming)
 - `skill://aku-code-conventions/REFERENCE_WIRING.md` — `[SerializeField]` + editor `Setup Refs` name-matching
-- `skill://aku-prefab` — prefab-asset lifecycle (asset file stays unprefixed)
-- `skill://aku-scene` — scene / hierarchy / component MCP ops

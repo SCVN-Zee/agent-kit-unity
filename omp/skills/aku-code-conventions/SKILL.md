@@ -39,7 +39,7 @@ Asset filenames, folders, importer intent, config-asset naming, and hierarchy na
 7. **Comments explain why, not what.**
 8. **Inspector-wire scene-time references.** No runtime `GetComponent` or `Find*`, including `Awake`/`Start`; only post-`Instantiate()` lookup is allowed. Editor-only setup may use lookup and must dirty the asset or scene.
 9. **Inspector decoration and picker mechanisms belong to `skill://aku-odin`.** Odin installed means Odin decoration attributes; no Odin means built-ins. Which fields need a picker is decided by rule 11.
-10. **Drive normal gameplay Animators with parameters and configured transitions**, not `Animator.Play`/`CrossFade`. Keep direct-state calls narrow and justified. Graph authoring belongs to `skill://aku-animator`.
+10. **Drive normal gameplay Animators with parameters and configured transitions**, not `Animator.Play`/`CrossFade`. Keep direct-state calls narrow and justified.
 11. **Finite value sets are never bare `string` or `int`.** A new member requiring a code path uses an enum; data-defined members use an authority-backed picker or ScriptableObject reference.
 12. **Every serialized reference is required unless explicitly optional.** With Odin, place `[Required]` in its own bracket; document optional null behavior with `[PropertyTooltip]`. Never apply `[Required]` to value types or collections. Without Odin, assert in `Init()` and name the field.
 
@@ -49,8 +49,6 @@ Asset filenames, folders, importer intent, config-asset naming, and hierarchy na
 rule://aku-code-convention-rules (automatic activation bridge)
   → skill://aku-code-conventions (authoritative code policy + subfile routing)
   → skill://aku-odin (Odin mechanisms, when installed)
-  → skill://aku-animator (Animator graph authoring)
-  → matching focused Unity skill or connected MCP capability
 ```
 
 ## Cross-references
@@ -58,4 +56,3 @@ rule://aku-code-convention-rules (automatic activation bridge)
 - `skill://aku-asset-conventions` — content folders, asset filenames, importer intent, and hierarchy naming
 - `rule://aku-code-convention-rules` — automatic C# activation bridge
 - `skill://aku-odin` — inspector decoration, validation attributes, and picker mechanisms
-- `skill://aku-animator` — AnimatorController and clip authoring

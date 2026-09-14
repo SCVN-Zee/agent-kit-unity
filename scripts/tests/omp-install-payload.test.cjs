@@ -51,9 +51,9 @@ test('base payload includes AGENTS.md, rules/*, and skills/**', () => {
   const base = payload.baseFiles(KIT_OMP);
   assert.ok(base['AGENTS.md'], 'AGENTS.md');
   assert.ok(base['rules/aku-core-rules.md'], 'the always-apply base rule');
-  assert.ok(base['rules/aku-mcp-policy.md'], 'a base rule');
-  assert.ok(base['skills/aku-scene/SKILL.md'], 'a skill SKILL.md');
-  assert.ok(base['skills/aku-scene/CINEMACHINE.md'], 'the focused Cinemachine recipe');
+  assert.ok(base['rules/aku-code-convention-rules.md'], 'a base rule');
+  assert.ok(base['skills/aku-code-conventions/SKILL.md'], 'a skill SKILL.md');
+  assert.ok(base['skills/aku-code-conventions/ANIMATOR_DRIVING.md'], 'a nested skill reference');
 });
 
 test('convention split ships exact inventories without the legacy skill or URI', () => {
@@ -112,7 +112,7 @@ test('tier overlay maps to rules/<name> tagged with the tier', () => {
 
 test('computePayload merges base + tier', () => {
   const full = payload.computePayload(KIT_OMP, ['supercent']);
-  assert.ok(full['skills/aku-scene/SKILL.md']);
+  assert.ok(full['skills/aku-code-conventions/SKILL.md']);
   assert.equal(full['rules/aku-sc-rules.md'].tier, 'supercent');
 });
 

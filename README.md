@@ -1,6 +1,6 @@
 # Agent Kit Unity
 
-> Standalone, MCP-agnostic Unity kit for AI coding agents: it teaches Unity conventions and routes Editor operations to whatever Unity MCP is connected — no server name hard-coded, none auto-registered. Ships as an Oh My Pi (OMP) project-scoped kit, so it activates only inside the Unity repo that contains it.
+> Standalone, MCP-agnostic Unity conventions kit for AI coding agents. Editor operations are left to the agent and its available tools — no server name hard-coded, none auto-registered. Ships as an Oh My Pi (OMP) project-scoped kit, so it activates only inside the Unity repo that contains it.
 
 **Release channels:** stable tags (`v0.1.0`) and beta tags (`v0.1.0-beta.7`) — no RC channel. Until the first stable tag exists, install from a pinned beta URL; GitHub's `releases/latest/` only resolves for stable releases.
 
@@ -13,7 +13,13 @@ Requirements: macOS or Linux with POSIX `sh`, `curl`, `tar`, and **Node 18+** (c
 ### 1. Run this from your Unity repo root
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4-beta.1/install.sh | sh
+```
+
+Or install with the **Supercent tier** explicitly enabled:
+
+```sh
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4-beta.1/install.sh | sh -s -- --tier supercent
 ```
 
 What just happened:
@@ -28,10 +34,22 @@ What just happened:
 `--check` and `--update` compare your install against the release named in the URL — change the version in the URL to move to a newer release (in a kit checkout, `make bump VERSION=<next>` does the whole bump):
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh -s -- --check      # drift report; exit 2 = out of sync
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh -s -- --update     # apply: add / update / keep / delete
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh -s -- --dry-run    # preview, writes nothing
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.1/install.sh | sh -s -- --uninstall  # removes hash-matching kit files only
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4-beta.1/install.sh | sh -s -- --check      # drift report; exit 2 = out of sync
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4-beta.1/install.sh | sh -s -- --dry-run    # preview, writes nothing
+```
+
+**Update** — apply additions, updates, and removals:
+
+```sh
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4-beta.1/install.sh | sh -s -- --update
+```
+
+If you explicitly enabled Supercent without its auto-detection marker, append `--tier supercent` to the update command to keep that tier.
+
+**Uninstall** — remove only hash-matching kit files:
+
+```sh
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4-beta.1/install.sh | sh -s -- --uninstall
 ```
 
 Decisions are made by **content hash, never version strings**: an unchanged re-run is a byte-identical no-op; a file you edited is kept as a conflict (never clobbered) unless `--force`; a departed file is deleted only while its on-disk hash still matches the lock.
@@ -49,38 +67,31 @@ Install any Unity MCP for your project — the kit registers none and hard-codes
 
 ---
 
-## Tutorial: your first kit-routed task
+## Tutorial: your first convention-guided task
 
-1. Open the Unity project (Editor running, MCP plugin connected) and start your agent session in the repo root.
+1. Start your agent session in the Unity repo root.
 2. Ask:
 
-   > add a Debug.Log to PlayerController.Update
+   > add a serialized movement speed to PlayerController
 
-3. **Expected:** the agent reaches for `script-read` (or `script-update-or-create`) without being told, then awaits the compile via `console-get-logs(severity="Error")` before any follow-up scene mutation.
-4. Now ask for asset work:
-
-   > tint the Player material red
-
-   **Expected:** routing through the MCP's material or script tools — never a text edit of `.mat`. Corrupt-on-edit types are guarded: `aku-mcp-guard` aborts the first raw edit and redirects to the policy-designated channel.
-5. If the agent pivots to plain `Read`/`Edit` instead, [file an issue](https://github.com/SCVN-Zee/agent-kit-unity/issues) with the session transcript.
+3. **Expected:** the agent follows the Unity C# naming and serialized-field conventions.
+4. Editor operations use the agent's judgment and available tools; the kit supplies no scene, prefab, or Animator workflow guide.
 
 ---
 
 ## What you get
 
-### Skills — 7 base + 3 Luna-tier
+### Skills — 5 base + 3 Luna-tier
 
-Four are user-invocable as `/skill:aku-<name>`; `aku-code-conventions`, `aku-asset-conventions`, and `aku-odin` are reference skills the others load. Three more Luna skills ship only on Luna playable targets (tier overlays — see [Tier overlays](#3-tier-overlays-auto-detected-or-opt-in)):
+Two are user-invocable as `/skill:aku-<name>`; `aku-code-conventions`, `aku-asset-conventions`, and `aku-odin` are reference skills. Three more Luna skills ship only on Luna playable targets (tier overlays — see [Tier overlays](#3-tier-overlays-auto-detected-or-opt-in)):
 
 | Skill | What it owns |
 |---|---|
-| `aku-scene` | Scenes, hierarchy, components, prefab-**instance** work, cameras, Cinemachine 2/3; detects prefab context before mutation and owns propagation tiers. |
-| `aku-prefab` | Prefab-**asset** lifecycle: the stage workflow (`assets-prefab-open` → mutate → `assets-prefab-save` → `assets-prefab-close`), create, instantiate, unpack, variant. |
-| `aku-animator` | AnimatorController + AnimationClip wiring — parameter-driven transitions, build order, transition-kind decision, and a read-back gate for unreachable states, conditionless transitions, weight-0 layers. |
 | `aku-code-conventions` | Unity C# conventions: naming, lifecycle pairing, inspector-first `[Required]` wiring, bounded-domain fields, parameter-driven Animator code. *(Reference skill.)* |
 | `aku-asset-conventions` | Unity content conventions: project layout, asset prefixes, texture-map suffixes, config naming, hierarchy name prefixes. *(Reference skill.)* |
 | `aku-odin` | Odin Inspector house style: task-based Inspector UX, groups/tabs, validation, escalation to `OdinEditorWindow`, menus, selectors, property trees, custom drawers. Absence of Odin is the only off-ramp. *(Reference skill.)* |
 | `aku-code-review` | Unity-flavored review: GC in hot paths, MonoBehaviour lifecycle/leaks, serialization defects, ungated editor code. Report-only. |
+| `aku-graft` | Opt-in Graft indexing and project-local OMP MCP setup; keeps generated files in Git local exclude without editing `.gitignore`. |
 
 | Skill | What it owns |
 |---|---|
@@ -88,23 +99,17 @@ Four are user-invocable as `/skill:aku-<name>`; `aku-code-conventions`, `aku-ass
 | `aku-luna-build-check` | Luna export build-settings probe against `luna.json` — 6 auto-fixable gates, 4 report-only advisories. |
 | `aku-luna-conventions` | Luna playable authoring constraints: editor-strip guards, transpile-safe providers, and export-sensitive Animator/prefab guidance. |
 
-**No focused skill for a domain?** Bind directly to a matching capability from the connected MCP; if none exists, `reflection-method-call` / `script-execute`. Covers physics · ui · render · test · build · surgical per-property prefab apply. (Luna *builds* → the Luna pipeline; Luna *source/asset review* → `/skill:aku-luna-code-review`.)
-
 **No specialist agents ship** — Unity work runs in the main session; review runs inline via the review skills.
 
-### Rules — 5 base + 2 tier overlays
+### Rules — 3 base + 2 tier overlays
 
 | Rule | Bucket | Loaded when |
 |---|---|---|
-| `aku-core-rules.md` | Sticky always-apply | Always — hard engine + MCP + serialize invariants |
+| `aku-core-rules.md` | Sticky always-apply | Always — engine conventions and serialized Editor mutations |
 | `aku-code-convention-rules.md` | Rulebook | On-demand when editing `**/*.cs` |
 | `aku-asset-convention-rules.md` | Rulebook | On-demand for asset work |
-| `aku-mcp-policy.md` | Rulebook | Serialized-asset safety, domain dispatch, reflection fallback |
-| `aku-mcp-guard.md` | TTSR | On `edit`/`write` of a corruptible Unity asset — aborts, redirects per the channel policy |
 | `aku-sc-rules.md` *(Supercent tier)* | Always-apply | `[Dev]` commit prefix + playable-ad layout |
 | `aku-luna-rules.md` *(Luna tier)* | Rulebook | Luna playable targets — the Odin editor-strip guard |
-
-**Corrupt-on-edit types (7):** `.prefab` `.unity` `.controller` `.anim` `.mat` `.playable` `.signal` — FileID webs, prefab apply chains, shader coupling; route through the Editor/MCP, never a text edit. Usually-safe YAML (`.asset`, `.preset`, `.spriteatlas`, …): a direct edit is usually harmless, but a routed tool is still better. Recovery path if an asset is ever corrupted: `git checkout` / `git restore`.
 
 ---
 
@@ -124,7 +129,7 @@ Four are user-invocable as `/skill:aku-<name>`; `aku-code-conventions`, `aku-ass
 - **Rules/skills not discovered** — confirm the repo has a populated `.omp/`, then rerun the same pinned-URL bootstrap used to install it.
 - **`--check` exits 2** — a managed file drifted from the lock, or an upstream update is available. Run `--update` (add `--force` to overwrite your own edits).
 - **Installer refuses** — it declines when `.omp/` is a symlink (writes could escape) or the lock is corrupt/forward-version; `--force` rebuilds a corrupt lock.
-- **Agent ignores the rules** — confirm `.omp/rules/aku-mcp-policy.md` exists, then restart the session.
+- **Agent ignores the rules** — confirm `.omp/rules/aku-core-rules.md` exists, then restart the session.
 - **MCP tools unresolved** — confirm a Unity MCP server is connected and its tools (or generated per-tool skills) appear in the in-context tool list; the kit binds to whatever is surfaced under any server name.
 
 ---

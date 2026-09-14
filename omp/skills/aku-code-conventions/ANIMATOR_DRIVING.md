@@ -1,6 +1,6 @@
 # Animator Driving — parameters, not `Play()`
 
-How runtime C# talks to an AnimatorController. Authoring the controller graph itself is `skill://aku-animator`; this file is the code side of the same contract.
+How runtime C# talks to an AnimatorController.
 
 **The rule:** set parameters and let the graph decide. `Animator.Play` / `CrossFade` forces a state directly, bypassing the transition's conditions, exit-time semantics, blend duration, and interruption rules — and leaves the state machine out of sync with the parameters that are supposed to describe it.
 
@@ -14,7 +14,7 @@ _animator.Play("Attack");
 _animator.SetTrigger(ATTACK_HASH);
 ```
 
-If `SetTrigger` doesn't produce the animation, the defect is a missing or misconfigured transition in the controller, **not** a reason to call `Play`. Fix the graph — `skill://aku-animator`.
+If `SetTrigger` doesn't produce the animation, the defect is a missing or misconfigured transition in the controller, **not** a reason to call `Play`. Fix the graph.
 
 ### Normal gameplay completion contract
 
@@ -136,12 +136,10 @@ _animator.SetLayerWeight(_upperBodyLayerIndex, _aimBlend);
 When the layer is configurable, select its name from the assigned controller and cache `_upperBodyLayerIndex` with
 `Animator.GetLayerIndex` during initialization.
 
-A layer authored at weight 0 that no code ever blends in plays nothing — see `skill://aku-animator/PATTERNS.md` trap 6.
+A layer authored at weight 0 that no code ever blends in plays nothing.
 
 ## Cross-references
 
-- `skill://aku-animator` — authoring the controller graph: build order, transition kinds, layers, the verify gate.
-- `skill://aku-animator/PATTERNS.md` — the failure modes this file's rules prevent.
 - `skill://aku-code-review/references/animator-review.md` — the review lens that flags violations of these rules.
 - `skill://aku-code-review/references/checklist-serialization-wiring.md` — general magic-string / `StringToHash` guidance.
 - `skill://aku-asset-conventions/ASSET_PREFIXES.md` — `C_` controllers, `A_` clips.

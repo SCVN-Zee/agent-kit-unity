@@ -54,8 +54,8 @@ test('uninstall keeps a drifted managed file, never deleting it', () => {
 
 test('uninstall preview and apply protect legacy orphan-marked bytes unless forced', () => {
   const t = sandbox();
-  const mismatchRel = 'skills/aku-scene/SKILL.md';
-  const absentRel = 'skills/aku-prefab/SKILL.md';
+  const mismatchRel = 'skills/aku-code-conventions/SKILL.md';
+  const absentRel = 'skills/aku-asset-conventions/SKILL.md';
   const driftedRel = 'rules/aku-core-rules.md';
   try {
     ship(t);
@@ -71,13 +71,13 @@ test('uninstall preview and apply protect legacy orphan-marked bytes unless forc
 
     const normalDry = ship(t, ['--uninstall', '--dry-run']);
     assert.match(normalDry.out, /would keep.*AGENTS\.md/is);
-    assert.match(normalDry.out, /would keep.*aku-scene\/SKILL\.md/is);
+    assert.match(normalDry.out, /would keep.*aku-code-conventions\/SKILL\.md/is);
     assert.match(normalDry.out, /would keep.*aku-core-rules\.md/is);
-    assert.match(normalDry.out, /already absent.*aku-prefab\/SKILL\.md/is);
+    assert.match(normalDry.out, /already absent.*aku-asset-conventions\/SKILL\.md/is);
     const forceDry = ship(t, ['--uninstall', '--dry-run', '--force']);
     assert.match(forceDry.out, /would remove.*AGENTS\.md/is);
-    assert.match(forceDry.out, /would keep.*aku-scene\/SKILL\.md/is);
-    assert.match(forceDry.out, /already absent.*aku-prefab\/SKILL\.md/is);
+    assert.match(forceDry.out, /would keep.*aku-code-conventions\/SKILL\.md/is);
+    assert.match(forceDry.out, /already absent.*aku-asset-conventions\/SKILL\.md/is);
 
     const kept = ship(t, ['--uninstall']);
     assert.equal(kept.code, 0, kept.out);
@@ -133,15 +133,15 @@ test('a crash-stranded .aku-tmp.* staging entry is swept on the next run', () =>
     // Simulate a prior run that crashed between write and rename: strays whose
     // embedded pid no run will ever match again, in the root and a subdir.
     fs.writeFileSync(omp(t, '.aku-tmp.99999.aku-lock.json'), 'stale');
-    fs.writeFileSync(omp(t, 'rules/.aku-tmp.99999.aku-mcp-policy.md'), 'stale');
+    fs.writeFileSync(omp(t, 'rules/.aku-tmp.99999.aku-code-convention-rules.md'), 'stale');
     // Delete a managed rule so the retry has a pending op in rules/ (the crash
     // that stranded the tmp would itself have left that op incomplete).
-    fs.rmSync(omp(t, 'rules/aku-mcp-policy.md'));
+    fs.rmSync(omp(t, 'rules/aku-code-convention-rules.md'));
     const r = ship(t);
     assert.equal(r.code, 0, r.out);
     assert.ok(!fs.existsSync(omp(t, '.aku-tmp.99999.aku-lock.json')), 'root stray swept');
-    assert.ok(!fs.existsSync(omp(t, 'rules/.aku-tmp.99999.aku-mcp-policy.md')), 'subdir stray swept');
-    assert.ok(fs.existsSync(omp(t, 'rules/aku-mcp-policy.md')), 'deleted managed rule recreated');
+    assert.ok(!fs.existsSync(omp(t, 'rules/.aku-tmp.99999.aku-code-convention-rules.md')), 'subdir stray swept');
+    assert.ok(fs.existsSync(omp(t, 'rules/aku-code-convention-rules.md')), 'deleted managed rule recreated');
     assert.equal(ship(t, ['--check']).code, 0, 'in sync after recovery');
   } finally { cleanup(t); }
 });

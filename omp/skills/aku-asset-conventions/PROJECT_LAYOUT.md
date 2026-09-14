@@ -35,4 +35,3 @@ Each project-specific folder uses this layout:
 
 - [`ASSET_PREFIXES.md`](ASSET_PREFIXES.md) — full asset prefix + texture suffix table
 - `skill://aku-code-conventions/NAMING.md` — C# naming (different from asset naming)
-- `skill://aku-scene` — scene/prefab/component MCP ops

@@ -4,7 +4,7 @@ This file provides guidance to coding agents working with this repository.
 
 ## Role
 
-This repo is a **standalone, MCP-agnostic, convention-only Unity kit**, shipped as an **Oh My Pi (OMP) project-scoped kit**. It teaches the agent **Unity conventions** (naming, structure, asset layout) and how to route Editor operations to **whatever Unity MCP is connected** — binding each capability to the tools already in the session's in-context tool list, hard-coding no server name and auto-registering nothing. It ships Unity domain skills and rules; it ships **no specialist agents** — a capable model, given the conventions and routing rules, decides for itself when to route an asset op through the connected MCP. Because it installs into a repo's `.omp/`, it activates only in that repo and stays silent everywhere else — no detection hooks needed.
+This repo is a **standalone, MCP-agnostic, convention-only Unity kit**, shipped as an **Oh My Pi (OMP) project-scoped kit**. It teaches **Unity conventions** (naming, structure, asset layout) and ships focused convention and review skills, with **no specialist agents**. Editor workflows and tool selection belong to the agent; the kit hard-codes no server name and auto-registers nothing. Because it installs into a repo's `.omp/`, it activates only in that repo and stays silent everywhere else — no detection hooks needed.
 
 > The globally-installed Claude Code / Codex builds (hooks, `~/.claude`, `~/.codex`) are **retired**. There is one build: the project-scoped OMP kit under `omp/`, installed with `ship-omp`.
 
@@ -28,7 +28,7 @@ Kit content cites **bare kebab capability ids in backticks** (`scene-open`, `scr
 ```
 omp/                       # The shipped kit (copied into a repo's .omp/)
   AGENTS.md                # project background + tier-detection instructions
-  rules/                   # aku-core-rules.md (sticky always-apply engine+MCP+serialize) + on-demand rulebook + TTSR guard
+  rules/                   # aku-core-rules.md (sticky engine conventions + serialize) + on-demand rulebooks
   skills/aku-*/            # focused Unity skills (SKILL.md + subfiles)
   tiers/<tier>/{rules,skills}/  # tier overlays copied in for matching repos (supercent, luna)
 scripts/
@@ -62,7 +62,7 @@ Makefile                   # OMP install/update/verify (make help | update | dry
 
 ## OMP kit conventions
 
-- **Rule buckets.** `rules/aku-core-rules.md` is sticky always-apply (full body every prompt, via `alwaysApply: true`) — it cannot self-gate, which is why the kit is project-scoped rather than user-global. The other `rules/*` are rulebook (name+desc indexed, body pulled via `rule://` on demand) except `aku-mcp-guard.md`, which is TTSR (fires once on a matching corrupt-on-edit `edit`/`write`). Supercent's `aku-sc-rules.md` is always-apply.
+- **Rule buckets.** `rules/aku-core-rules.md` is sticky always-apply (full body every prompt, via `alwaysApply: true`) — it cannot self-gate, which is why the kit is project-scoped rather than user-global. The other base `rules/*` are rulebook (name+desc indexed, body pulled via `rule://` on demand). Supercent's `aku-sc-rules.md` is always-apply. No TTSR guard ships.
 - **Discovery.** OMP finds `.omp/` rules and skills at priority 100; skills live one level under `.omp/skills/` as `<name>/SKILL.md`, addressable as `skill://aku-<name>` and `/skill:aku-<name>`.
 - **Lock inertness.** `.omp/aku-lock.json` matches no rule/skill/config discovery path — the only `.omp/*.json` the kit reads by name is `aku-project.json`. The lock is therefore inert (no dot-prefix needed).
 

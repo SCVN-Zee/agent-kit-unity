@@ -1,8 +1,8 @@
 # agent-kit-unity (OMP)
 
-Unity conventions + Editor-operation routing for this project. Teaches Unity naming/structure/asset layout and how to route Editor operations to **whatever Unity MCP is connected** — binding each capability to the tools already in your in-context tool list, hard-coding no server name.
+Unity conventions for this project: naming, structure, asset layout, and review. Editor workflows and tool selection belong to the agent; the kit hard-codes no server name.
 
-The hard, always-on invariants live in the sticky, always-apply `rule://aku-core-rules` (in the same `.omp/rules/` directory). Situational conventions and policies are on-demand rules — read them via `rule://<name>` when the work calls for them. Unity domain workflows are skills — invoke `/skill:aku-<name>` or read `skill://aku-<name>`.
+The hard, always-on invariants live in the sticky, always-apply `rule://aku-core-rules` (in the same `.omp/rules/` directory). Situational conventions are on-demand rules — read them via `rule://<name>` when the work calls for them. Convention and review skills are available via `/skill:aku-<name>` or `skill://aku-<name>`.
 
 ## Detect tier before applying tier-specific guidance
 
@@ -18,4 +18,4 @@ OMP rules cannot run detection code, so confirm the project's tier by reading th
 
 **Setup:** install any Unity MCP for this project — most expose the same core capabilities (scene, prefab, asset DB, animator, material, reflection/script execution); the kit hard-codes none and binds to whatever your session surfaces.
 
-A Unity MCP commonly ships each tool twice — as an `mcp__<server>__<kebab>` tool and as an auto-generated bare-`<kebab>` skill. Kit content cites **bare kebab capability ids in backticks** (`scene-open`, `script-update-or-create`) as illustrative labels; bind each to whichever surface your connected server registers. Never reproduce a server prefix as a binding. Full detail: `rule://aku-mcp-policy`.
+A Unity MCP commonly ships each tool twice — as an `mcp__<server>__<kebab>` tool and as an auto-generated bare-`<kebab>` skill. Kit content cites **bare kebab capability ids in backticks** (`scene-open`, `script-update-or-create`) as illustrative labels; bind each to whichever surface your connected server registers. Never reproduce a server prefix as a binding.

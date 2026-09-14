@@ -1,6 +1,6 @@
 ---
 name: aku-asset-conventions
-description: "Use when—and only when—a request asks for Unity asset or hierarchy naming, importing, folder layout, importer intent, config names, or texture suffixes. Owns conventions, not mutation: do not load for scene, prefab, Animator, material, or other serialized operations unless naming or organization is requested; use focused skills or the connected Unity MCP."
+description: "Use when—and only when—a request asks for Unity asset or hierarchy naming, importing, folder layout, importer intent, config names, or texture suffixes. Owns conventions, not mutation: do not load for scene, prefab, Animator, material, or other serialized operations unless naming or organization is requested."
 ---
 
 # aku-asset-conventions — Unity Asset Conventions
@@ -23,7 +23,7 @@ C# identifiers, class structure, serialized fields, reference wiring, and runtim
 - Naming UI or VFX GameObjects inside a scene or prefab hierarchy.
 - Reviewing Unity content organization or asset-name compliance.
 
-This skill defines policy only. Use `skill://aku-scene` for scene and instance changes, `skill://aku-prefab` for prefab assets, `skill://aku-animator` for controllers and clips, and a matching capability from the connected Unity MCP for other Editor operations.
+This skill defines conventions only, not Editor operations.
 
 ## Critical rules (cheat sheet)
 
@@ -37,8 +37,6 @@ This skill defines policy only. Use `skill://aku-scene` for scene and instance c
 ```text
 rule://aku-asset-convention-rules (automatic activation bridge)
   → skill://aku-asset-conventions (full naming and organization rules)
-  → matching connected Unity MCP capability (other operations)
-  → skill://aku-scene | skill://aku-prefab | skill://aku-animator (asset-specific operations)
 ```
 
 ## Cross-references
@@ -46,6 +44,3 @@ rule://aku-asset-convention-rules (automatic activation bridge)
 - `skill://aku-code-conventions` — Unity C# naming, structure, fields, and reference wiring
 - `rule://aku-asset-convention-rules` — automatic activation bridge to this skill
 - `rule://aku-sc-rules` — Supercent-specific playable layout overlay
-- `skill://aku-scene` — scene and prefab-instance operations
-- `skill://aku-prefab` — prefab-asset operations
-- `skill://aku-animator` — AnimatorController and clip operations

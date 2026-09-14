@@ -17,7 +17,7 @@ This skill is loaded by `rule://aku-luna-rules` for Luna playable authoring. It 
 
 ## Workflow
 
-1. Apply the common Unity skill for the operation: `skill://aku-code-conventions`, `skill://aku-animator`, `skill://aku-prefab`, or `skill://aku-odin`.
+1. Apply the common Unity conventions as relevant: `skill://aku-code-conventions`, `skill://aku-asset-conventions`, or `skill://aku-odin`.
 2. Apply `references/authoring-guards.md` to every Odin `using` and attribute in runtime-transpiled source.
 3. Apply `references/animator-prefab.md` to Animator and prefab changes.
 4. Keep `[SerializeField]` and `[SerializeReference]` outside conditional compilation; Odin decorates, Unity serializes.

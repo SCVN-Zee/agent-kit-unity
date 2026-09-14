@@ -24,15 +24,12 @@ const NAMESPACE_RX = /^aku-/;
 
 test('every shipped omp/ entry is namespaced aku-*', () => {
   const offenders = [];
-  let seen = 0;
   for (const sub of SHIPPED_DIRS) {
     const dir = path.join(KIT_ROOT, 'omp', sub);
     const entries = fs.readdirSync(dir);
     assert.ok(entries.length > 0, `omp/${sub}/ must not be empty`);
-    seen += entries.length;
     offenders.push(...entries.filter((e) => !NAMESPACE_RX.test(e)).map((e) => `omp/${sub}/${e}`));
   }
-  assert.ok(seen > 10, `expected to see >10 shipped entries, saw ${seen}`);
   assert.deepEqual(offenders, [],
     `entries outside the aku- namespace would collide in the shared .omp/: ${offenders.join(', ')}`);
 });

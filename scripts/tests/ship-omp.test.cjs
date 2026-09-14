@@ -16,8 +16,8 @@ test('fresh default install writes the .omp tree + a valid lock, without Luna sk
   try {
     const r = ship(t);
     assert.equal(r.code, 0, r.out);
-    for (const rel of ['AGENTS.md', 'rules/aku-core-rules.md', 'rules/aku-mcp-policy.md',
-      'skills/aku-scene/SKILL.md', 'skills/aku-scene/CINEMACHINE.md', 'aku-lock.json']) {
+    for (const rel of ['AGENTS.md', 'rules/aku-core-rules.md', 'rules/aku-code-convention-rules.md',
+      'skills/aku-code-conventions/SKILL.md', 'skills/aku-code-conventions/ANIMATOR_DRIVING.md', 'aku-lock.json']) {
       assert.ok(fs.existsSync(omp(t, rel)), `missing ${rel}`);
     }
     assert.ok(!fs.existsSync(omp(t, 'skills/aku-luna-build-check')), 'luna skill absent from default install');
@@ -100,10 +100,10 @@ test('--update recreates a deleted managed file', () => {
   const t = sandbox();
   try {
     ship(t);
-    fs.unlinkSync(omp(t, 'rules/aku-mcp-policy.md'));
+    fs.unlinkSync(omp(t, 'rules/aku-code-convention-rules.md'));
     const r = ship(t, ['--update']);
     assert.equal(r.code, 0);
-    assert.ok(fs.existsSync(omp(t, 'rules/aku-mcp-policy.md')), 'recreated');
+    assert.ok(fs.existsSync(omp(t, 'rules/aku-code-convention-rules.md')), 'recreated');
   } finally { cleanup(t); }
 });
 
@@ -122,42 +122,49 @@ test('tier overlay installs on marker and prunes when the marker is removed', ()
   } finally { cleanup(t); }
 });
 
-test('removed generic router prunes clean siblings and preserves edited bytes', () => {
+test('retired Editor guides prune clean siblings and preserve edited bytes', () => {
   const t = sandbox();
-  const root = ['skills', 'aku-unity'].join('/');
-  const clean = root + '/SKILL.md';
-  const nested = root + '/examples/basic.md';
-  const edited = root + '/references/workflow.md';
-  const baseline = Buffer.from('# retired router\n');
+  const retired = /^(?:rules\/aku-mcp-(?:guard|policy)\.md|skills\/aku-(?:animator|prefab|scene)\/)/;
+  const clean = ['rules/aku-mcp-policy.md', 'skills/aku-animator/SKILL.md',
+    'skills/aku-prefab/SKILL.md', 'skills/aku-scene/SKILL.md',
+    'skills/aku-scene/examples/nested-prefab-apply.md'];
+  const edited = ['rules/aku-mcp-guard.md', 'skills/aku-prefab/examples/asset-mode-edit.md'];
+  const baseline = Buffer.from('# retired guide\n');
   const editedBytes = Buffer.concat([baseline, Buffer.from('USER EDIT\n')]);
   try {
-    ship(t);
+    assert.equal(ship(t).code, 0);
     const lockPath = omp(t, 'aku-lock.json');
     const lock = readLock(t);
+    assert.equal(Object.keys(lock.files).some((rel) => retired.test(rel)), false);
     const now = new Date().toISOString();
-    for (const rel of [clean, nested, edited]) {
+    for (const rel of [...clean, ...edited]) {
+      assert.ok(!fs.existsSync(omp(t, rel)), 'retired guide shipped: ' + rel);
       fs.mkdirSync(path.dirname(omp(t, rel)), { recursive: true });
       fs.writeFileSync(omp(t, rel), baseline);
       lock.files[rel] = { hash: sha(baseline), installedAt: now, updatedAt: now };
     }
     fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
-    fs.writeFileSync(omp(t, edited), editedBytes);
+    for (const rel of edited) fs.writeFileSync(omp(t, rel), editedBytes);
 
-    const updated = ship(t, ['--update']);
-    assert.equal(updated.code, 0, updated.out);
-    assert.ok(!fs.existsSync(omp(t, clean)) && !fs.existsSync(omp(t, nested)));
-    assert.deepEqual(fs.readFileSync(omp(t, edited)), editedBytes);
-    let next = readLock(t);
-    assert.deepEqual(Object.keys(next.files).filter((rel) => rel.startsWith(root)), [edited]);
-    assert.equal(next.files[edited].hash, sha(baseline), 'trusted baseline changed');
-    assert.equal(next.files[edited].orphaned, true);
-
-    assert.equal(ship(t, ['--update']).code, 0);
-    assert.deepEqual(fs.readFileSync(omp(t, edited)), editedBytes);
+    for (let cycle = 0; cycle < 2; cycle++) {
+      const updated = ship(t, ['--update']);
+      assert.equal(updated.code, 0, updated.out);
+      for (const rel of clean) assert.ok(!fs.existsSync(omp(t, rel)), 'not pruned: ' + rel);
+      const next = readLock(t);
+      assert.deepEqual(Object.keys(next.files).filter((rel) => retired.test(rel)).sort(), edited.slice().sort());
+      for (const rel of edited) {
+        assert.deepEqual(fs.readFileSync(omp(t, rel)), editedBytes);
+        assert.equal(next.files[rel].hash, sha(baseline), 'trusted baseline changed');
+        assert.equal(next.files[rel].orphaned, true);
+      }
+      assert.equal(ship(t, ['--check']).code, 2, 'preserved conflicts remain visible');
+    }
     assert.equal(ship(t, ['--update', '--force']).code, 0);
-    assert.ok(!fs.existsSync(omp(t, root)), 'force should remove the retired directory');
-    next = readLock(t);
-    assert.equal(Object.keys(next.files).some((rel) => rel.startsWith(root)), false);
+    for (const rel of edited) assert.ok(!fs.existsSync(omp(t, rel)));
+    for (const name of ['animator', 'prefab', 'scene']) {
+      assert.ok(!fs.existsSync(omp(t, 'skills/aku-' + name)), 'retired directory remains');
+    }
+    assert.equal(Object.keys(readLock(t).files).some((rel) => retired.test(rel)), false);
     assert.equal(ship(t, ['--check']).code, 0);
   } finally { cleanup(t); }
 });
