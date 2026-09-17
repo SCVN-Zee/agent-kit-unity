@@ -5,7 +5,7 @@
 #   make dry-run   TARGET_DIR=/path/to/unity-repo   # preview, writes nothing
 #   make check     TARGET_DIR=/path/to/unity-repo   # verify in sync (exit 2 = drift)
 #   make uninstall TARGET_DIR=/path/to/unity-repo   # remove trusted matching paths + lock
-#   make bump      VERSION=x.y.z[-beta.N]           # bump version + README URL, gate, release commit + tag
+#   make bump      VERSION=x.y.z[-beta.N]           # bump version, gate, release commit + tag
 #
 # TARGET_DIR is a make VARIABLE, not a flag. The kit is convention-only and
 # project-scoped: `ship-omp` copies omp/{AGENTS.md,rules,skills} plus
@@ -60,14 +60,13 @@ lint: ## Run all lint gates (loc, frontmatter, docs-counts)
 check: lint test ## Full verification gate — lint + test (run before an update)
 	@echo "✓ all gates green"
 
-bump: ## Release prep: version bump, README URL, make check, release commit + annotated tag (VERSION= required; leading v optional)
+bump: ## Release prep: version bump, make check, release commit + annotated tag (VERSION= required; leading v optional)
 	@set -eu; \
 	v='$(VERSION)'; v=$${v#v}; \
 	$(NODE) -e "const br=require('./scripts/build-release.cjs');const v=process.argv[1];if(!(br.STABLE.test(v)||br.BETA.test(v))){console.error('make bump: VERSION must match scripts/build-release.cjs — x.y.z or x.y.z-beta.N, N>=1 (got '+(v||'none')+')');process.exit(2)}" "$$v"; \
 	npm version "$$v" --no-git-tag-version; \
 	v=$$(node -p "require('./package.json').version"); \
-	node -e "const fs=require('fs');const v=require('./package.json').version;const p='README.md';const s=fs.readFileSync(p,'utf8');const rx=/\/download\/v[^/]+\/install\.sh/g;if(!rx.test(s)){console.error('make bump: no /download/v*/install.sh URL found in README.md');process.exit(1)}fs.writeFileSync(p,s.replace(rx,'/download/v'+v+'/install.sh'));console.log('bump: README install URL -> v'+v)"; \
 	$(MAKE) check; \
-	git commit -q -m "chore(release): v$$v" CHANGELOG.md package.json package-lock.json README.md; \
+	git commit -q -m "chore(release): v$$v" CHANGELOG.md package.json package-lock.json; \
 	git tag -a "v$$v" -m "v$$v"; \
-	echo "Bumped to v$$v — version files + README committed, gate green, annotated tag v$$v created. Push with: git push --atomic origin $$(git branch --show-current) v$$v"
+	echo "Bumped to v$$v — version files + changelog committed, gate green, annotated tag v$$v created. Push with: git push --atomic origin $$(git branch --show-current) v$$v"

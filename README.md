@@ -2,7 +2,7 @@
 
 > Standalone, MCP-agnostic Unity conventions kit for AI coding agents. Editor operations are left to the agent and its available tools — no server name hard-coded, none auto-registered. Ships as an Oh My Pi (OMP) project-scoped kit, so it activates only inside the Unity repo that contains it.
 
-**Release channels:** stable tags (`v0.1.0`) and beta tags (`v0.1.0-beta.7`) — no RC channel. Until the first stable tag exists, install from a pinned beta URL; GitHub's `releases/latest/` only resolves for stable releases.
+**Release channels:** stable tags (`v0.1.0`) and beta tags (`v0.1.0-beta.7`) — no RC channel. The commands below always use the latest stable release; beta releases require a pinned URL.
 
 > **Migrating from the retired global builds?** The Claude Code / Codex global installs (hooks, `~/.claude`, `~/.codex`) are gone. There is one build: the project-scoped OMP kit inside your repo's `.omp/`.
 
@@ -13,35 +13,37 @@ Requirements: macOS or Linux with POSIX `sh`, `curl`, `tar`, and **Node 18+** (c
 ### 1. Run this from your Unity repo root
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4/install.sh | sh
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh
 ```
 
 Or install with the **Supercent tier** explicitly enabled:
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4/install.sh | sh -s -- --tier supercent
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --tier supercent
 ```
 
 What just happened:
 
-- The bootstrap downloaded the release pinned in the URL, **verified the downloaded archive against the SHA-256 embedded in `install.sh`** before running anything, then installed `.omp/{AGENTS.md,rules/*,skills/**}` plus the notebook `.omp/aku-lock.json` — a raw-byte SHA-256 per installed file. The lock is how later updates and uninstall tell "kit file, untouched" apart from "yours".
+- GitHub selected the latest stable release's installer. The bootstrap downloaded that installer's version-pinned archive, **verified it against the SHA-256 embedded in `install.sh`** before running the kit installer, then installed `.omp/{AGENTS.md,rules/*,skills/**}` plus the notebook `.omp/aku-lock.json` — a raw-byte SHA-256 per installed file. The lock is how later updates and uninstall tell "kit file, untouched" apart from "yours".
 - If the target matches a tier — by auto-detection (section 3) or an explicit `--tier <name>` opt-in — the installer copies that tier's rule files **flattened into `rules/`**; there is never a `.omp/tiers/` directory in an install. The active set is recorded in `aku-lock.json` under `tiers`.
 - No path argument means **the current directory**. For another target, replace the trailing `| sh` with `| sh -s -- /path/to/unity-repo`.
-- `set -o pipefail` — bash, zsh, or dash ≥ 0.5.12 — makes a failed or partial download exit loudly instead of faking success. Drop it and a 404 silently "succeeds". On a strict POSIX `sh`, use the equally fail-closed one-shot instead: `s=$(curl -fsSL <the URL above>) && sh -c "$s"`. Once the first **stable** tag ships, `https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh` follows the latest stable.
+- `set -o pipefail` — bash, zsh, or dash ≥ 0.5.12 — makes a failed or partial download exit loudly instead of faking success. Drop it and a 404 silently "succeeds". On a strict POSIX `sh`, use the equally fail-closed one-shot instead: `s=$(curl -fsSL <the URL above>) && sh -c "$s"`.
+
+For a reproducible install or a beta release, replace `/releases/latest/download/install.sh` with `/releases/download/<tag>/install.sh`, using an exact published tag such as `v0.1.4` or `v0.1.0-beta.7`. Pinned URLs stay on that release until you change the tag.
 
 ### 2. Verify, update, remove
 
-`--check` and `--update` compare your install against the release named in the URL — change the version in the URL to move to a newer release (in a kit checkout, `make bump VERSION=<next>` does the whole bump):
+`--check` and `--update` compare your install against the latest stable release — reuse these commands after each release without changing the URL:
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4/install.sh | sh -s -- --check      # drift report; exit 2 = out of sync
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4/install.sh | sh -s -- --dry-run    # preview, writes nothing
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --check      # drift report; exit 2 = out of sync
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --dry-run    # preview, writes nothing
 ```
 
 **Update** — apply additions, updates, and removals:
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4/install.sh | sh -s -- --update
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --update
 ```
 
 If you explicitly enabled Supercent without its auto-detection marker, append `--tier supercent` to the update command to keep that tier.
@@ -49,7 +51,7 @@ If you explicitly enabled Supercent without its auto-detection marker, append `-
 **Uninstall** — remove only hash-matching kit files:
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/download/v0.1.4/install.sh | sh -s -- --uninstall
+set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --uninstall
 ```
 
 Decisions are made by **content hash, never version strings**: an unchanged re-run is a byte-identical no-op; a file you edited is kept as a conflict (never clobbered) unless `--force`; a departed file is deleted only while its on-disk hash still matches the lock.
@@ -148,7 +150,7 @@ Two are user-invocable as `/skill:aku-<name>`; `aku-code-conventions`, `aku-asse
 make help       # all targets
 make update TARGET_DIR=/path/to/unity-repo   # install/refresh + write the lock (TARGET_DIR is a variable, default `.`)
 make check      # full gate: lint (loc / frontmatter / docs-counts) + tests — must exit 0
-make bump VERSION=x.y.z   # release prep: version bump + README install URL, make check, release commit + annotated tag
+make bump VERSION=x.y.z   # release prep: version bump, make check, release commit + annotated tag
 ```
 
 Contributor rules that bite — single `aku-*` namespace, never blanket-rename `unity-`, the lock is untrusted destructive input, no runtime deps — plus the release runbook and lint-gate details: see [`AGENTS.md`](./AGENTS.md).
