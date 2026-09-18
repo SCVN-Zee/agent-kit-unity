@@ -1,162 +1,72 @@
 # Agent Kit Unity
 
-> Standalone, MCP-agnostic Unity conventions kit for AI coding agents. Editor operations are left to the agent and its available tools — no server name hard-coded, none auto-registered. Ships as an Oh My Pi (OMP) project-scoped kit, so it activates only inside the Unity repo that contains it.
+Unity coding, asset, and Inspector conventions for **OMP, Pi, Codex, and Claude Code**. Project-local; no agents or MCP servers are installed.
 
-**Release channels:** stable tags (`v0.1.0`) and beta tags (`v0.1.0-beta.7`) — no RC channel. The commands below always use the latest stable release; beta releases require a pinned URL.
+Explore the rules and skills in the [visual kit guide](kit-guide.html) (open locally in a browser).
 
-> **Migrating from the retired global builds?** The Claude Code / Codex global installs (hooks, `~/.claude`, `~/.codex`) are gone. There is one build: the project-scoped OMP kit inside your repo's `.omp/`.
+## 1. Install
 
-## Install
-
-Requirements: macOS or Linux with POSIX `sh`, `curl`, `tar`, and **Node 18+** (checksum verification + installer; stdlib only).
-
-### 1. Run this from your Unity repo root
+Requires **Node 18+**, macOS or Linux, `curl`, and `tar`. Run from your Unity project root in Bash or Zsh:
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh
+set -o pipefail
+curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh
 ```
 
-Or install with the **Supercent tier** explicitly enabled:
+This installs the latest stable release for **OMP**. To choose another host, append `-s -- --target pi` to `sh`; valid targets are `omp`, `pi`, `codex`, and `claude`.
+
+**New target support requires a release containing it.** If the published installer lacks your target, run from this kit checkout instead:
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --tier supercent
+node scripts/ship-kit.cjs /path/to/unity-project --target pi
 ```
 
-What just happened:
+Replace `pi` with your host. Each target has independent ownership:
 
-- GitHub selected the latest stable release's installer. The bootstrap downloaded that installer's version-pinned archive, **verified it against the SHA-256 embedded in `install.sh`** before running the kit installer, then installed `.omp/{AGENTS.md,rules/*,skills/**}` plus the notebook `.omp/aku-lock.json` — a raw-byte SHA-256 per installed file. The lock is how later updates and uninstall tell "kit file, untouched" apart from "yours".
-- If the target matches a tier — by auto-detection (section 3) or an explicit `--tier <name>` opt-in — the installer copies that tier's rule files **flattened into `rules/`**; there is never a `.omp/tiers/` directory in an install. The active set is recorded in `aku-lock.json` under `tiers`.
-- No path argument means **the current directory**. For another target, replace the trailing `| sh` with `| sh -s -- /path/to/unity-repo`.
-- `set -o pipefail` — bash, zsh, or dash ≥ 0.5.12 — makes a failed or partial download exit loudly instead of faking success. Drop it and a 404 silently "succeeds". On a strict POSIX `sh`, use the equally fail-closed one-shot instead: `s=$(curl -fsSL <the URL above>) && sh -c "$s"`.
+| Target | Skills | Startup guidance |
+| --- | --- | --- |
+| `omp` | `.omp/skills/` | `.omp/AGENTS.md` and always-apply rules |
+| `pi` | `.pi/skills/` | `.pi/APPEND_SYSTEM.md` |
+| `codex` | `.agents/skills/` | Managed section in root `AGENTS.md` |
+| `claude` | `.claude/skills/` | `.claude/rules/aku-project.md` |
 
-For a reproducible install or a beta release, replace `/releases/latest/download/install.sh` with `/releases/download/<tag>/install.sh`, using an exact published tag such as `v0.1.4` or `v0.1.0-beta.7`. Pinned URLs stay on that release until you change the tag.
+Pi's project append file takes precedence over its global append file. Codex preserves surrounding `AGENTS.md` content; its paths are shared discovery surfaces, not host-exclusive. Claude leaves `CLAUDE.md` and settings alone.
 
-### 2. Verify, update, remove
+## 2. Try it
 
-`--check` and `--update` compare your install against the latest stable release — reuse these commands after each release without changing the URL:
+1. Start or restart your agent in the Unity project root; trust the project when prompted. Pi also supports `/reload`.
+2. Ask: **“Add a serialized movement speed to PlayerController.”**
+3. For reference-led gameplay, invoke the skill below with your reference and desired feature.
+
+| Host | Invocation |
+| --- | --- |
+| OMP / Pi | `/skill:aku-reference-feature` |
+| Codex | `$aku-reference-feature` |
+| Claude Code | `/aku-reference-feature` |
+
+Connect your preferred Unity MCP for Editor operations. The kit uses whichever capabilities are available; it registers none.
+
+## 3. Update or remove
+
+Use the **same target every time**; omitting it selects OMP. Example for Pi:
 
 ```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --check      # drift report; exit 2 = out of sync
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --dry-run    # preview, writes nothing
+set -o pipefail
+curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --target pi --update
 ```
 
-**Update** — apply additions, updates, and removals:
+Replace `--update` with `--check` to check drift, `--dry-run` to preview, or `--uninstall` to remove the kit. From a checkout, use the same flags with `node scripts/ship-kit.cjs /path/to/unity-project`.
 
-```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --update
-```
+Edited files are preserved as conflicts. Back up and resolve them before retrying; use `--force` only to deliberately adopt or replace conflicting content. Unsafe paths and symlinks remain blocked. `--check` exits 2 for drift; incomplete Codex/Claude uninstall also exits 2 and retains edited files and ownership records.
 
-If you explicitly enabled Supercent without its auto-detection marker, append `--tier supercent` to the update command to keep that tier.
+## Optional settings
 
-**Uninstall** — remove only hash-matching kit files:
+- **Tiers:** append `--tier supercent` or `--tier luna`. Supported project markers also enable auto-detection. Repeat explicit tier flags on updates; they are not saved preferences.
+- **Beta:** append `--channel beta` to the bootstrap command (requires a bootstrap supporting channels). No stable fallback occurs. For a fixed release, replace `/releases/latest/download/` in the URL with `/releases/download/<tag>/`.
+- **Overrides:** your target's `aku-project.json` (`.omp/`, `.pi/`, `.codex/`, or `.claude/`) accepts `lunaPlayable` and `odin` booleans. Markers are optional, user-owned, and never shared across targets.
 
-```sh
-set -o pipefail; curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --uninstall
-```
+## Contribute
 
-Decisions are made by **content hash, never version strings**: an unchanged re-run is a byte-identical no-op; a file you edited is kept as a conflict (never clobbered) unless `--force`; a departed file is deleted only while its on-disk hash still matches the lock.
+Edit shared content in `kit/`, then run `make check`. See [AGENTS.md](AGENTS.md) for contributor and release rules. `docs/` stays local-only and Git-ignored.
 
-### 3. Tier overlays (auto-detected or opt-in)
-
-- **Supercent** — `Assets/Supercent/` present → `aku-sc-rules.md`.
-- **Luna playable** — a Luna/Playworks package is present AND the target is playable (`.omp/aku-project.json` `{"lunaPlayable":true}` wins; else the branch name contains `playable`) → `aku-luna-rules.md` plus the three Luna-tier skills (below).
-
-Opt in without markers, or override auto-detection: `| sh -s -- --tier a,b` / `--no-tier a,b` — unknown tier names fail loudly instead of installing nothing. Tier flags are **per-invocation**: a later `--update` without them re-runs auto-detection and prunes forced tier overlays no marker supports — the lock's `tiers` records the last install's set, it is not selection config.
-
-### 4. Bring your own Unity MCP
-
-Install any Unity MCP for your project — the kit registers none and hard-codes no name; it binds each capability it needs to whatever tools the connected server surfaces in context (scene, prefab, asset-DB, animator, material, …). Most Unity MCPs expose the same core capabilities, so the choice of server is yours.
-
----
-
-## Tutorial: your first convention-guided task
-
-1. Start your agent session in the Unity repo root.
-2. Ask:
-
-   > add a serialized movement speed to PlayerController
-
-3. **Expected:** the agent follows the Unity C# naming and serialized-field conventions.
-4. Editor operations use the agent's judgment and available tools; the kit supplies no scene, prefab, or Animator workflow guide.
-
----
-
-## What you get
-
-### Skills — 5 base + 3 Luna-tier
-
-Two are user-invocable as `/skill:aku-<name>`; `aku-code-conventions`, `aku-asset-conventions`, and `aku-odin` are reference skills. Three more Luna skills ship only on Luna playable targets (tier overlays — see [Tier overlays](#3-tier-overlays-auto-detected-or-opt-in)):
-
-| Skill | What it owns |
-|---|---|
-| `aku-code-conventions` | Unity C# conventions: naming, lifecycle pairing, inspector-first `[Required]` wiring, bounded-domain fields, parameter-driven Animator code. *(Reference skill.)* |
-| `aku-asset-conventions` | Unity content conventions: project layout, asset prefixes, texture-map suffixes, config naming, hierarchy name prefixes. *(Reference skill.)* |
-| `aku-odin` | Odin Inspector house style: task-based Inspector UX, groups/tabs, validation, escalation to `OdinEditorWindow`, menus, selectors, property trees, custom drawers. Absence of Odin is the only off-ramp. *(Reference skill.)* |
-| `aku-code-review` | Unity-flavored review: GC in hot paths, MonoBehaviour lifecycle/leaks, serialization defects, ungated editor code. Report-only. |
-| `aku-graft` | Opt-in Graft indexing and project-local OMP MCP setup; keeps generated files in Git local exclude without editing `.gitignore`. |
-
-| Skill | What it owns |
-|---|---|
-| `aku-luna-code-review` | Luna playable compatibility: Bridge.NET forbidden-API hazards and asset risks that compile in Editor but strip or no-op in Luna builds. Report-only. |
-| `aku-luna-build-check` | Luna export build-settings probe against `luna.json` — 6 auto-fixable gates, 4 report-only advisories. |
-| `aku-luna-conventions` | Luna playable authoring constraints: editor-strip guards, transpile-safe providers, and export-sensitive Animator/prefab guidance. |
-
-**No specialist agents ship** — Unity work runs in the main session; review runs inline via the review skills.
-
-### Rules — 3 base + 2 tier overlays
-
-| Rule | Bucket | Loaded when |
-|---|---|---|
-| `aku-core-rules.md` | Sticky always-apply | Always — engine conventions and serialized Editor mutations |
-| `aku-code-convention-rules.md` | Rulebook | On-demand when editing `**/*.cs` |
-| `aku-asset-convention-rules.md` | Rulebook | On-demand for asset work |
-| `aku-sc-rules.md` *(Supercent tier)* | Always-apply | `[Dev]` commit prefix + playable-ad layout |
-| `aku-luna-rules.md` *(Luna tier)* | Rulebook | Luna playable targets — the Odin editor-strip guard |
-
----
-
-## Configure
-
-`.omp/aku-project.json` — optional committed file the kit reads by name (the installer never writes it):
-
-| Key | Effect |
-|---|---|
-| `lunaPlayable` (`true`/`false`) | Authoritative override for "active Luna playable target"; beats the branch-name heuristic. Gates `aku-luna-rules.md`. |
-| `odin` (`true`/`false`) | Overrides Odin Inspector auto-detection; beats every auto signal. |
-
----
-
-## Troubleshooting
-
-- **Rules/skills not discovered** — confirm the repo has a populated `.omp/`, then rerun the same pinned-URL bootstrap used to install it.
-- **`--check` exits 2** — a managed file drifted from the lock, or an upstream update is available. Run `--update` (add `--force` to overwrite your own edits).
-- **Installer refuses** — it declines when `.omp/` is a symlink (writes could escape) or the lock is corrupt/forward-version; `--force` rebuilds a corrupt lock.
-- **Agent ignores the rules** — confirm `.omp/rules/aku-core-rules.md` exists, then restart the session.
-- **MCP tools unresolved** — confirm a Unity MCP server is connected and its tools (or generated per-tool skills) appear in the in-context tool list; the kit binds to whatever is surfaced under any server name.
-
----
-
-## Develop the kit
-
-| Path | Contents |
-|---|---|
-| `omp/` | The shipped kit: `AGENTS.md`, `rules/`, `skills/`, `tiers/<tier>/rules/` overlays |
-| `scripts/` | `ship-omp.cjs` + `lib/` (lock, payload, reconcile, tier-detect, apply), lint gates |
-| `scripts/tests/`, `test/` | Unit + integration suites |
-| `references/` | Vendored Unity-MCP plugin + extension repos (gitignored from CI) |
-| `plans/`, `docs/` | Plans and long-form documentation (untracked, local-only) |
-
-```bash
-make help       # all targets
-make update TARGET_DIR=/path/to/unity-repo   # install/refresh + write the lock (TARGET_DIR is a variable, default `.`)
-make check      # full gate: lint (loc / frontmatter / docs-counts) + tests — must exit 0
-make bump VERSION=x.y.z   # release prep: version bump, make check, release commit + annotated tag
-```
-
-Contributor rules that bite — single `aku-*` namespace, never blanket-rename `unity-`, the lock is untrusted destructive input, no runtime deps — plus the release runbook and lint-gate details: see [`AGENTS.md`](./AGENTS.md).
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE).
+[MIT License](LICENSE)

@@ -8,50 +8,59 @@
  * Fixture counts: 2 skills, 2 rules.
  */
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { execFileSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const { execFileSync } = require("child_process");
 
-const KIT_ROOT = path.resolve(__dirname, '../../..');
-const SCRIPT = path.join(KIT_ROOT, 'scripts/lint-docs-counts.cjs');
+const KIT_ROOT = path.resolve(__dirname, "../../..");
+const SCRIPT = path.join(KIT_ROOT, "scripts/lint-docs-counts.cjs");
 
 const DIRS = [
-  'omp/skills/aku-alpha', 'omp/skills/aku-beta', 'omp/rules',
-  'docs', 'docs/journals', 'docs/components/skills', 'docs/components/rules'
+ "kit/skills/aku-alpha",
+ "kit/skills/aku-beta",
+ "kit/rules",
+ "docs",
+ "docs/journals",
+ "docs/components/skills",
+ "docs/components/rules",
 ];
 const MIRROR = {
-  skills: ['aku-alpha', 'aku-beta'],
-  rules: ['aku-one', 'aku-two']
+ skills: ["aku-alpha", "aku-beta"],
+ rules: ["aku-one", "aku-two"],
 };
 
 function makeTmpRoot() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aku-counts-'));
-  for (const d of DIRS) fs.mkdirSync(path.join(dir, d), { recursive: true });
+ const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aku-counts-"));
+ for (const d of DIRS) fs.mkdirSync(path.join(dir, d), { recursive: true });
 
-  write(dir, 'omp/skills/aku-alpha/SKILL.md', '# alpha\n');
-  write(dir, 'omp/skills/aku-beta/SKILL.md', '# beta\n');
-  write(dir, 'omp/rules/aku-one.md', '# one\n');
-  write(dir, 'omp/rules/aku-two.md', '# two\n');
+ write(dir, "kit/skills/aku-alpha/SKILL.md", "# alpha\n");
+ write(dir, "kit/skills/aku-beta/SKILL.md", "# beta\n");
+ write(dir, "kit/rules/aku-one.md", "# one\n");
+ write(dir, "kit/rules/aku-two.md", "# two\n");
 
-  for (const [cat, stems] of Object.entries(MIRROR)) {
-    for (const s of stems) write(dir, `docs/components/${cat}/${s}.md`, `# ${s}\n`);
-  }
-  return dir;
+ for (const [cat, stems] of Object.entries(MIRROR)) {
+  for (const s of stems)
+   write(dir, `docs/components/${cat}/${s}.md`, `# ${s}\n`);
+ }
+ return dir;
 }
 
 function write(root, rel, text) {
-  fs.writeFileSync(path.join(root, rel), text);
+ fs.writeFileSync(path.join(root, rel), text);
 }
 
 /** Run the gate against `root`; never throws — returns { code, out }. */
 function run(root) {
-  try {
-    const out = execFileSync('node', [SCRIPT, '--root', root], { encoding: 'utf8', stdio: 'pipe' });
-    return { code: 0, out };
-  } catch (e) {
-    return { code: e.status, out: `${e.stdout || ''}${e.stderr || ''}` };
-  }
+ try {
+  const out = execFileSync("node", [SCRIPT, "--root", root], {
+   encoding: "utf8",
+   stdio: "pipe",
+  });
+  return { code: 0, out };
+ } catch (e) {
+  return { code: e.status, out: `${e.stdout || ""}${e.stderr || ""}` };
+ }
 }
 
 module.exports = { makeTmpRoot, run, write };

@@ -25,9 +25,9 @@
  * plan() is pure: no fs reads or writes.
  */
 
-const path = require('path');
-const { assertSafePath } = require('./path-safety');
-const { isSafeKey } = require('./omp-install-lock');
+const path = require("path");
+const { assertSafePath } = require("./path-safety");
+const { isSafeKey } = require("./omp-install-lock");
 
 /**
  * Resolve + containment-guard a single install dest. Rejects empty/`.`/`..`/
@@ -35,10 +35,12 @@ const { isSafeKey } = require('./omp-install-lock');
  * path that escapes the root. Path math only — no fs.
  */
 function assertDest(ompDir, rel) {
-  if (!isSafeKey(rel)) throw new Error(`unsafe install path: ${JSON.stringify(rel)}`);
+  if (!isSafeKey(rel))
+    throw new Error(`unsafe install path: ${JSON.stringify(rel)}`);
   const root = path.resolve(ompDir);
   const abs = path.resolve(root, rel);
-  if (abs === root) throw new Error(`refusing to operate on the .omp/ root itself: ${rel}`);
+  if (abs === root)
+    throw new Error(`refusing to operate on the .omp/ root itself: ${rel}`);
   assertSafePath(abs, root);
   return abs;
 }
@@ -49,31 +51,37 @@ function classify(S, L, I) {
   const hasI = I !== undefined && I !== null;
 
   if (hasS) {
-    if (!hasI) return hasL ? 'recreate' : 'create';
-    if (I === S) return 'unchanged';
+    if (!hasI) return hasL ? "recreate" : "create";
+    if (I === S) return "unchanged";
     // I !== S below.
-    if (!hasL) return 'conflict';        // hand-copied, diverged, no lock
-    if (I === L) return 'update';        // upstream changed, disk still old
-    return 'conflict';                   // user edited a managed file
+    if (!hasL) return "conflict"; // hand-copied, diverged, no lock
+    if (I === L) return "update"; // upstream changed, disk still old
+    return "conflict"; // user edited a managed file
   }
   // S absent.
-  if (!hasL) return 'ignore';            // never ours (or nothing to do)
-  if (!hasI) return 'drop';              // recorded, gone from disk and source
-  if (I === L) return 'prune';           // left payload, integrity gate holds
-  return 'conflict';                     // departed AND user-edited → orphaned
+  if (!hasL) return "ignore"; // never ours (or nothing to do)
+  if (!hasI) return "drop"; // recorded, gone from disk and source
+  if (I === L) return "prune"; // left payload, integrity gate holds
+  return "conflict"; // departed AND user-edited → orphaned
 }
 
-function plan({ payload = {}, installed = {}, prior = null, ompDir = '.omp' }) {
+function plan({ payload = {}, installed = {}, prior = null, ompDir = ".omp" }) {
   const priorFiles = (prior && prior.files) || {};
   const keys = new Set([
     ...Object.keys(payload),
     ...Object.keys(priorFiles),
-    ...Object.keys(installed)
+    ...Object.keys(installed),
   ]);
 
   const out = {
-    creates: [], updates: [], recreates: [], prunes: [],
-    drops: [], conflicts: [], unchanged: [], ignored: []
+    creates: [],
+    updates: [],
+    recreates: [],
+    prunes: [],
+    drops: [],
+    conflicts: [],
+    unchanged: [],
+    ignored: [],
   };
 
   for (const rel of [...keys].sort()) {
@@ -86,35 +94,51 @@ function plan({ payload = {}, installed = {}, prior = null, ompDir = '.omp' }) {
     let action = classify(S, L, I);
     // Old keep-mode locks may contain user bytes marked orphaned. Never use
     // that untrusted hash to justify an automatic update or prune.
-    if (priorEntry && priorEntry.orphaned === true && I !== undefined && I !== S) {
-      action = 'conflict';
+    if (
+      priorEntry &&
+      priorEntry.orphaned === true &&
+      I !== undefined &&
+      I !== S
+    ) {
+      action = "conflict";
     }
 
     // Every actionable dest is containment-checked here so a crafted prior lock
     // key can never smuggle a write/delete outside the root.
-    if (action !== 'ignore') assertDest(ompDir, rel);
+    if (action !== "ignore") assertDest(ompDir, rel);
 
-    if (action === 'create' || action === 'update' || action === 'recreate') {
-      out[action + 's'].push({ rel, srcAbs: src.srcAbs, hash: S, tier: src.tier });
-    } else if (action === 'unchanged') {
+    if (action === "create" || action === "update" || action === "recreate") {
+      out[action + "s"].push({
+        rel,
+        srcAbs: src.srcAbs,
+        ...(src.content ? { content: src.content } : {}),
+        hash: S,
+        tier: src.tier,
+      });
+    } else if (action === "unchanged") {
       out.unchanged.push({ rel, hash: S, tier: src.tier });
-    } else if (action === 'prune') {
+    } else if (action === "prune") {
       out.prunes.push({ rel, recordedHash: L, installedHash: I });
-    } else if (action === 'drop') {
+    } else if (action === "drop") {
       out.drops.push(rel);
-    } else if (action === 'ignore') {
+    } else if (action === "ignore") {
       out.ignored.push(rel);
-    } else if (action === 'conflict') {
-      const orphaned = S === undefined;             // departed payload → out of management
+    } else if (action === "conflict") {
+      const orphaned = S === undefined; // departed payload → out of management
       out.conflicts.push({
         rel,
         srcAbs: src ? src.srcAbs : undefined,
-        hash: S,                                     // source hash if the file is still packaged
-        tier: src ? src.tier : (priorFiles[rel] ? priorFiles[rel].tier : undefined),
-        recordedHash: L,                             // trusted baseline; never replace with user bytes
+        ...(src && src.content ? { content: src.content } : {}),
+        hash: S, // source hash if the file is still packaged
+        tier: src
+          ? src.tier
+          : priorFiles[rel]
+            ? priorFiles[rel].tier
+            : undefined,
+        recordedHash: L, // trusted baseline; never replace with user bytes
         installedHash: I,
         legacyOrphaned: priorEntry && priorEntry.orphaned === true,
-        orphaned
+        orphaned,
       });
     }
   }
@@ -136,17 +160,21 @@ function plan({ payload = {}, installed = {}, prior = null, ompDir = '.omp' }) {
  *            pruned by the caller and dropped from the lock.
  * Prunes and drops are removed from management, so they are never recorded.
  */
-function lockEntries(p, mode = 'keep') {
+function lockEntries(p, mode = "keep") {
   const entries = {};
-  for (const bucket of ['creates', 'updates', 'recreates', 'unchanged']) {
+  for (const bucket of ["creates", "updates", "recreates", "unchanged"]) {
     for (const e of p[bucket]) entries[e.rel] = { hash: e.hash, tier: e.tier };
   }
   for (const c of p.conflicts) {
-    if (mode === 'force') {
-      if (c.orphaned) continue;                      // caller deletes it → not recorded
+    if (mode === "force") {
+      if (c.orphaned) continue; // caller deletes it → not recorded
       entries[c.rel] = { hash: c.hash, tier: c.tier };
     } else if (c.recordedHash != null) {
-      entries[c.rel] = { hash: c.recordedHash, tier: c.tier, orphaned: c.orphaned || c.legacyOrphaned || undefined };
+      entries[c.rel] = {
+        hash: c.recordedHash,
+        tier: c.tier,
+        orphaned: c.orphaned || c.legacyOrphaned || undefined,
+      };
     }
   }
   return entries;

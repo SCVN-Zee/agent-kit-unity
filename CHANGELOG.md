@@ -3,13 +3,34 @@
 All notable changes to this project are documented in this file. Maintainers update it before pushing an exact stable or beta release tag.
 
 ## [Unreleased]
+
+### Fixed
+
+- **Local Codebase Memory ignore policy.** Setup now adds root `.cbmignore` to Git's worktree-aware `info/exclude`, preserving existing rules and `.gitignore`, avoiding duplicate entries, and reporting already-tracked files without untracking them.
+- **Unity convention correctness.** Separate managed references from scene-component interfaces, prefab overrides from saving, collection count from element validation, and pool return from destruction. Correct shader/importer assumptions, editor namespaces, setup examples and review false positives; report-only review no longer saves scenes or treats console silence as compile proof.
+- **Release bump gate and retry.** Split oversized installer, release, frontmatter, and test modules to meet the existing 200-line gate without exemptions. `make bump` accepts the same version after a failed gate; checks still run before the release commit and annotated tag.
+
 ### Added
-- **Opt-in Graft setup.** `aku-graft` merges its MCP server into the project-root `.mcp.json` and configures structural indexing, keeps `/graft/` and `/.ignore` in Git local exclude, and disables `.gitignore` writes during builds and query refreshes.
+
+- **Project-scoped Codex and Claude Code targets.** `--target codex|claude` generates native skills and startup guidance from `kit/`, with target-local markers, independent locks, byte-preserving Codex `AGENTS.md` section ownership, explicit shared-file adoption, and recoverable per-file writes. Edited uninstall entries retain their baselines and exit 2; symlinks, malformed sections, and unsafe lock paths remain blocked even with force. Includes lifecycle, coexistence, interruption, real-bootstrap tests, and an opt-in no-model Codex discovery probe. OMP remains the default; no global installers, MCP registration, or publishers are added. Live startup/invocation and real Unity consumer checks require separate verification.
+- **Visual kit field guide.** `kit-guide.html` explains every current rule and skill with an overview-first task chooser, diagrams, expandable mechanisms and file inventories, source-backed cross-references, and OMP/Pi boundaries.
+- **Task-oriented Odin UX recipes.** Added grouping/actions, pickers/validation, collections/references and version/module guides, plus generic component and table examples. Window examples own generated icons and support actual asset selection without assuming a content root. Visual Designer, UI Toolkit, Addressables and Validator remain optional; examples include explicit consumer-verification requirements.
+- **Opt-in Codebase Memory setup skill.** `aku-codebase-memory` guides explicit installation and project MCP configuration, Unity indexing exclusions, backed-up Graft migration, and separate CLI/MCP verification. Ships to OMP and Pi without executing setup or registering servers.
+- **Project-scoped Pi target.** All installer modes accept `--target pi|omp` (default `omp`), with independent `.pi/` and `.omp/` locks and tier override files. Pi content is generated from `kit/`: native skills, adapted references, startup conventions/task routing. Pi conflicts block before writes; symlinks and unexpected file types are refused even with force. The release bootstrap forwards target selection; maintainers can use `make update TARGET=pi TARGET_DIR=<repo>`. Project-root launch and trust are required, and Pi's project append file takes precedence over its global append file.
+- **Beta channel selection in the bootstrap.** The generated `install.sh` now accepts `--channel stable|beta`: it selects the highest published `X.Y.Z-beta.N` release, downloads that release's own bootstrap, checks it against the SHA-256 GitHub reports for the published asset, and only then runs it. The flag is consumed before the kit installer sees the arguments, so every mode and tier flag combines with it unchanged. A missing, unreachable, or altered release fails loudly instead of falling back to stable, both release publishers stay as they are, and version-pinned URLs keep working.
+- **Reference-led feature development.** Added `aku-reference-feature`: source evidence and cue mapping, adaptation challenge, local ownership/lifecycle integration, and independent gameplay/fidelity verification. Developed under `omp/skills/`; supports analysis, copy, and port intent without a hard-coded Unity server. Includes explicit fidelity/consent decisions, evidence-limited eval assertions, and a six-case paired replay procedure with discovery and safety controls.
+  Evaluation prompts and replay instructions are development-only under `evals/aku-reference-feature/`, outside the installed skill payload.
+
 ### Removed
+
+- **Graft skill retired.** Removed `aku-graft` and its dedicated Pi adapter. Installer updates prune unchanged managed copies and preserve user-edited copies as conflicts.
 - **Editor routing guides retired.** Removed `aku-mcp-guard`, `aku-mcp-policy`, and the complete `aku-animator`, `aku-prefab`, and `aku-scene` skills. Agents choose their own Editor workflows; C#, asset, Odin, review, and Luna conventions remain. Updates prune unchanged managed copies, including nested skill files, and preserve user-edited copies as conflicts unless `--force`.
 - **Concurrent tier retired.** `omp/tiers/concurrent/` is gone — the agent detects a shared working directory at runtime, so no installed rule is needed. The next `--update` prunes `rules/aku-session-commit-rules.md` when its bytes still match the lock (a user-edited copy is kept as a conflict unless `--force`), and `.omp/aku-project.json` `concurrentSessions` is no longer read by anything.
 
 ### Changed
+
+- **Simpler documentation.** README is now a short install/use/update tutorial. The visual guide lives at root with repaired source links; `docs/` is ignored and its host guides remain local-only.
+- **Shared source named `kit/`.** Renamed the source directory from `omp/` to `kit/` and introduced canonical `ship-kit.cjs` / `aku-ship-kit` entrypoints. `ship-omp.cjs` and `aku-ship-omp` remain compatibility aliases. Installed `.omp/` and `.pi/` paths, target flags, lock identity, and payload bytes are unchanged. Packaging, bootstrap, lint roots, and test fixtures now use `kit/`.
 - **Latest-stable README commands.** Install, check, preview, update, and uninstall commands now use the permanent `releases/latest/download/install.sh` URL, including the explicit Supercent-tier example. Version-pinned URLs remain documented for reproducible and beta installs. `make bump` no longer requires or rewrites pinned README URLs.
 - **Changelog no longer gates `make bump`.** The release-prep target no longer requires a `## [<version>]` `CHANGELOG.md` section; the `scripts/build-release.cjs` channel-rule gate and the downstream bump → `make check` → release commit/tag flow remain, and an edited changelog still rides in the release commit.
 - **Tier opt-in is explicit and validated.** `--tier/--no-tier` (comma-separated; `install.sh` forwards it) is the documented optional-install method for the `luna` and `supercent` overlays, auto-detection for those tiers is unchanged, and unknown tier names now fail loudly instead of silently installing nothing.
@@ -21,11 +42,13 @@ All notable changes to this project are documented in this file. Maintainers upd
 ## [0.1.1-beta.2] — 2026-08-29
 
 ### Changed
+
 - **Reference catalog and machinery removed.** `docs/MCP_CATALOG.md`, `snapshots/`, `scripts/sync-mcp-catalog.cjs` with its lib helpers/tests/fixtures, `scripts/data/mcp-catalog-overrides.json`, and the `lint:catalog` gate are gone. Kit capability ids are illustrative labels bound at runtime to whatever the connected Unity MCP surfaces; `lint-docs-counts` now derives component counts only (skills/rules), and `docs-facts` no longer reads snapshots.
 
 ## [0.1.0-beta.8] — 2026-08-29
 
 ### Changed
+
 - **Kit guidance is "install any Unity MCP."** Shipped rules/skills and user-facing prose carry zero specific-MCP names, zero per-server install guidance, and zero pointers to any one server's catalog: the binding policy is server-agnostic end to end and tells users to install any Unity MCP (most share the same core capabilities). The dev-time illustrative reference catalog (`docs/MCP_CATALOG.md` + `snapshots/` + `lint:catalog`) is unchanged on disk as maintainer research per the decoupling plan — its user-facing pointers are removed; maintainers find it via `AGENTS.md` and the regeneration scripts.
 - **Install-first README.** The README now leads with the one-line pinned-URL bootstrap (`set -o pipefail; curl -fsSL …/install.sh | sh`), which installs into the current directory by default and forwards targets and modes via `| sh -s --`, plus a first-run tutorial and a compressed component overview. Contributor, release-runbook, and lint-gate detail is consolidated in `AGENTS.md`. The maintenance wrapper form is retired in favor of the pipefail one-liner (with the `s=$(curl …) && sh -c "$s"` fallback for strict POSIX shells).
 - **Single-command bootstrap and `make bump`.** README install and manage commands are now one literal, self-contained line each with the current release baked into the URL (update by changing that version, or by running the new release-prep target). `make bump VERSION=x.y.z[-beta.N]` (leading `v` optional) validates `VERSION` against the exact `build-release.cjs` channel rule, refuses until `CHANGELOG.md` contains the matching `## [<version>]` section, then bumps `package.json`/`package-lock.json`, rewrites the README install URL, reruns `make check`, creates the narrow `chore(release): v<version>` commit (changelog + version files + README) and adds annotated tag `v<version>`.
@@ -33,18 +56,21 @@ All notable changes to this project are documented in this file. Maintainers upd
 ## [0.1.0-beta.7] — 2026-08-28
 
 ### Changed
+
 - **Atomic release asset verification.** Stable and beta publishers now compare the uploaded names, byte sizes, and GitHub SHA-256 digests for all three release assets against the local build before making a draft public.
 - **Tag-only release titles.** Stable and beta release names now exactly match their tags, such as `v0.1.0-beta.7`.
 
 ## [0.1.0-beta.5] — 2026-08-28
 
 ### BREAKING
+
 - **Convention skill URI split.** `skill://aku-conventions` is replaced by `skill://aku-code-conventions` and `skill://aku-asset-conventions` with no compatibility alias. Code naming, structure, fields, wiring, bounded domains, and runtime Animator policy route to the code skill; content layout, asset filenames/importer intent, config assets, and hierarchy naming route to the asset skill.
 - **Generic Unity router removed.** `aku-unity` no longer ships and has no compatibility alias. Prompts now activate the focused scene, prefab, Animator, review, convention, Odin, or Luna skill directly; unmatched Unity domains bind straight to connected MCP capabilities with reflection or script execution as fallback. Cinemachine 2/3 guidance now belongs to `aku-scene`, while catalog-maintainer overrides are build data under `scripts/data/`. Existing installs prune the retired skill when unchanged and preserve user-edited departed files as conflicts.
 - **Generic routing rulebooks removed.** `aku-capability-routing` and `aku-parallel-rules` no longer ship and have no compatibility aliases. Host-agent capability selection and orchestration remain host concerns; the sticky engine rule still serializes Unity Editor mutations. Existing managed installs prune unchanged copies and preserve user-edited copies as conflicts.
 - **Asset-edit guard retired — the kit is now convention-only.** The PreToolUse asset guard, its cross-agent ship machinery (`ship-guard`, `build-guard-bundle`, the whole **Cursor** target), the portable Unity invariants, the editor-state HARD-GATEs, the Cinemachine "never install" landmine, and the Luna Odin editor-strip guard are all removed. The kit ships conventions + MCP file→tool routing knowledge only. `AKU_ASSET_GUARD`/`CKU_ASSET_GUARD` are inert. **Codex and Cursor users must run `node scripts/ship-guard.cjs --uninstall --target codex|cursor` before upgrading** (not self-healing); Claude Code self-heals on `make update`. See `MIGRATION.md` § "Guard retired".
 
 ### Added
+
 - **Tag-driven GitHub Releases.** Separate stable (`vX.Y.Z`) and beta (`vX.Y.Z-beta.N`) workflows run the full repository gate, build a draft release, verify its exact asset set, and publish only after all checks pass.
 - **Checksum-verified release bootstrap.** `scripts/build-release.cjs` emits exactly `install.sh`, `agent-kit-unity-v<version>.tgz`, and `SHA256SUMS`; the bootstrap verifies the archive before running the packaged OMP installer.
 - `aku-odin` skill — owns the Odin-instead-of-built-ins mandate (`[Header]`→`[Title]`, icon-first `[Button(SdfIconType.…)]`) and editor-tooling house style. `aku-code-conventions` keeps `[Required]` and bounded-domain policy and imperatively routes inspector work to the Odin skill.
@@ -52,6 +78,7 @@ All notable changes to this project are documented in this file. Maintainers upd
 - `claude/rules/unity-supercent-rules.md` — new `## Commit prefix` section carrying the Supercent commit-message convention (`[Dev] <type>: <subject>`). Folded in from former `sc-git-rules.md`.
 
 ### Changed
+
 - **Independent distribution identity.** Package metadata and public release URLs now use `SCVN-Zee/agent-kit-unity`; the current package version is `0.1.0-beta.5`, and consumer install/update/check/uninstall guidance uses stable-latest or exact-beta GitHub bootstrap URLs instead of a global npm install.
 - **Branch-independent tagged releases.** Stable and beta workflows still reject non-canonical repositories and enforce exact tag/package/lock versions, but now publish the exact tagged commit without fetching or requiring ancestry from any branch.
 - **Reproducible catalog verification.** Generated MCP catalog snapshots and `docs/MCP_CATALOG.md` are tracked so fresh checkouts run the same catalog gate as contributor worktrees.
@@ -66,6 +93,7 @@ All notable changes to this project are documented in this file. Maintainers upd
 - **`omp/RULES.md` relocated to `omp/rules/aku-engine-rules.md`** — the sticky always-apply engine + MCP + serialize invariants now ship as an `alwaysApply: true` rule inside `rules/` instead of a top-level `RULES.md` bucket (behavior preserved; renamed off the ambiguous `RULES` stem to the `aku-<domain>-rules` pattern). Existing installs migrate automatically on `ship-omp --update`: the old top-level `RULES.md` is pruned when unmodified (kept as a conflict if user-edited) and the relocated rule is installed. Installer payload (`omp-install-payload.js`), lock round-trip, `ship-omp`/safety tests, `lint:docs-counts` (now 7 base rules), and all docs/cross-refs (`README.md`, `omp/README.md`, `omp/AGENTS.md`, `AGENTS.md`, `Makefile`, `aku-conventions`) updated accordingly.
 
 ### Removed
+
 - **Competing npm publisher.** Semantic-release configuration, scripts, publish metadata, and dependencies are removed. GitHub tag workflows are the only release publishers; no npm package is published.
 - `claude/rules/sc-git-rules.md` — content merged into `unity-supercent-rules.md`; path added to `metadata.json.deletions[]` so installers clean up stale copies.
 - `claude/rules/unity-supercent-rules.md` — `## Kit substitutions` section dropped (`Supercent.Util.CoroutineUtil`, `Supercent.UIv2`, `BehaviourBase` substitutions no longer prescribed by the kit).
@@ -76,6 +104,7 @@ All notable changes to this project are documented in this file. Maintainers upd
 Adopt Supercent C# coding + asset-naming + project-layout standards as a Supercent-only auto-detected layer. Generic Unity projects unaffected.
 
 ### Added
+
 - `claude/lib/supercent-detect.js` — detects `Assets/Supercent/` presence; gates Supercent rule injection.
 - `claude/rules/unity-supercent-rules.md` — compact auto-injected overlay (access modifiers, braces, no `var`, naming prefixes, `[field: SerializeField]` SO pattern, lifecycle pairing, comments-for-why, asset folder/prefix guidance).
 - `claude/skills/cku-conventions/` — full convention detail in 8 files: `SKILL.md`, `NAMING.md`, `STRUCTURE.md`, `PROJECT_LAYOUT.md`, `ASSET_PREFIXES.md`, plus 3 canonical examples (MonoBehaviour template with section dividers, ScriptableObject `[field: SerializeField]` pattern, Init/Release lifecycle pattern).
@@ -83,6 +112,7 @@ Adopt Supercent C# coding + asset-naming + project-layout standards as a Superce
 - Folder layout: `Sprites/Ingame|UI/` mirroring `Textures/` (replaces `Art/`).
 
 ### Changed
+
 - `claude/hooks/unity-context-inject.cjs` — load `unity-supercent-rules.md` conditionally on Supercent projects; hint string now includes "Supercent layout".
 - `claude/agents/unity-scripter.md` — Conventions section expanded (access modifiers, braces, no `var`, section dividers, SO pattern); anti-patterns extended; references `cku:conventions`.
 - `claude/agents/unity-engineer.md` — Core principles include Supercent layer; references `cku:conventions`.
@@ -90,6 +120,7 @@ Adopt Supercent C# coding + asset-naming + project-layout standards as a Superce
 - 14 existing example files brought into compliance with the new standards (`private` modifiers, full braces, no `var`, comments-for-why, namespace placeholder `<GameName>.<Variant>`).
 
 ### Notes
+
 - Kit is purely additive on the Supercent layer; non-Supercent Unity projects see no behavioral change.
 - Source standards file `temp/code-standards.md` (provided as one-off input) deleted; standards live in the kit.
 
@@ -98,6 +129,7 @@ Adopt Supercent C# coding + asset-naming + project-layout standards as a Superce
 Initial release candidate covering all five phases of the [claudekit-unity supportive-kit plan](../unitykit/plans/260430-1717-claudekit-unity-supportive-kit/plan.md).
 
 ### Phase 1 — Skeleton + critical path
+
 - Repo skeleton mirroring claudekit-engineer / claudekit-marketing layout
 - `claude/hooks/unity-context-inject.cjs` — SessionStart hook; auto-detects Unity projects + injects rules
 - `claude/lib/unity-version-detect.js` — Unity version + render pipeline + Luna detection
@@ -107,12 +139,14 @@ Initial release candidate covering all five phases of the [claudekit-unity suppo
 - `scripts/dev-link.cjs` — symlink kit into a target Unity project; idempotent settings patch; --resync-settings; --uninstall
 
 ### Phase 2 — Domain skills + asset guard
+
 - Skills: `cku:script`, `cku:scene`, `cku:test`, `cku:build` (each with SKILL/PATTERNS/MCP_USAGE/examples)
 - Agents: `unity-scripter`, `unity-tester` (lightweight routing wrappers)
 - `claude/hooks/unity-asset-edit-guard.cjs` — PreToolUse blocker for `.prefab`/`.unity`/`.asset`/etc., with `CKU_DISABLE_ASSET_GUARD=1` escape hatch + rolling 100-line log
 - `claude/workflows/unity-feature-development.md`
 
 ### Phase 3 — Specialist skills + perf
+
 - Skills: `cku:anim`, `cku:physics`, `cku:ui`, `cku:render` (each with U6/2022 sections)
 - Agent: `unity-perf-profiler` (capture → analyze → suggest)
 - `claude/hooks/unity-mcp-reminder.cjs` — debounced once-per-session UserPromptSubmit nudge; `CKU_DISABLE_MCP_REMINDER=1` escape hatch
@@ -120,12 +154,14 @@ Initial release candidate covering all five phases of the [claudekit-unity suppo
 - `unity-version-detect.js` extended with `getRenderPipelineVersion()`
 
 ### Phase 4 — Luna playable-ads pipeline
+
 - `cku:luna` skill (CONSTRAINTS, PATTERNS, MCP_USAGE, 2 examples). SDK pin currently `TBD` pending open question #2.
 - `claude/rules/unity-luna-rules.md` — auto-injected on Luna projects
 - `claude/workflows/unity-playable-ad-build.md`
 - P1 catalogs (`DECISION_TREE.md`, agent prompts, `cku:build/SKILL.md`) cross-link Luna
 
 ### Phase 5 — Distribution + CI
+
 - `scripts/merge-settings.cjs` — install-time deep-merger; `.bak.<ts>` snapshot (24h cooldown); idempotent
 - `scripts/lint-mcp-refs.cjs` — validates every `mcp__unity__*` ref in markdown against `snapshots/mcp-tools.json`; supports `--snapshot` and `--refresh-snapshot --tools-list <file>`; `<!-- mcp-lint-ignore -->` per-line override for intentional family patterns
 - `scripts/lint-loc.cjs` — 200-LOC budget enforcer with carve-out for `MCP_CATALOG.md` reference data
@@ -138,6 +174,7 @@ Initial release candidate covering all five phases of the [claudekit-unity suppo
 - `package.json` — `bin` exposes `cku-merge-settings` + `cku-dev-link`; `lint:mcp`, `lint:loc`, `lint:frontmatter` scripts
 
 ### Open questions (carried from plan)
+
 1. claudekit-cli `--kit unity` upstream PR vs direct-install path — README documents both for now.
 2. Luna SDK version baseline — `cku:luna/SKILL.md` frontmatter `luna-sdk: TBD`. Lock before Luna build is run for real.
 3. Unity 6 vs 2022 gating granularity — currently in `cku:render`, `cku:anim`, `cku:ui` only.
@@ -147,10 +184,12 @@ Initial release candidate covering all five phases of the [claudekit-unity suppo
 7. Marketing-kit Luna integration — decoupled per plan; revisit in a follow-up.
 
 ### Known limitations
+
 - `snapshots/mcp-tools.json` is a bootstrap inventory — refresh against a live Unity MCP server before shipping 1.0 final.
 - DinoUniverse end-to-end smoke test (validation gate S5) tracked as a follow-up; Phase 1 hook + skill content verified against synthetic projects in this commit.
 - `unity-asset-edit-guard.cjs` does not currently block direct `.meta` file edits. Direct GUID edits also break asset DB; revisit if reported.
 
 ### Code-review follow-ups (rc.1 → 1.0)
+
 - **Fixed in rc.1:** asset guard switched from exit-2-with-stdout-JSON (legacy contract that suppressed the redirect message) to exit-0-with-block-decision JSON (modern contract); `isWithin` replaces unsafe `path.startsWith` in `symlink-helpers.js`; uninstall scans timestamped `.bak.<iso>` as fallback to plain `.bak`; dev-link no longer overwrites a pre-existing backup chain; workflow files renamed `unity-*` so the `OWNED_FILE_PATTERNS` filter picks them up (otherwise dev-link skipped them silently).
 - **Deferred:** synthetic test for concurrent UserPromptSubmit hook fires (low-likelihood; atomic-rename means no partial JSON); concurrent asset-guard log writers across sessions sharing a cwd; reduce reliance on `process.cwd()` in hook log paths (use `CLAUDE_PROJECT_DIR` env when available).

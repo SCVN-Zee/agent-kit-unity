@@ -12,15 +12,18 @@
  *    apply start (`.omp/` is kit-owned, so a pid-agnostic sweep is safe).
  */
 
-const fs = require('fs');
-const path = require('path');
-const { copyEntry, TMP_PREFIX } = require('./global-install-fs');
-const { hashBytes } = require('./omp-install-lock');
-const { assertDest } = require('./omp-install-reconcile');
+const fs = require("fs");
+const path = require("path");
+const { copyEntry, writeAtomic, TMP_PREFIX } = require("./global-install-fs");
+const { hashBytes } = require("./omp-install-lock");
+const { assertDest } = require("./omp-install-reconcile");
 
 function onDiskHash(abs) {
-  try { return hashBytes(fs.readFileSync(abs)); }
-  catch (_) { return null; }
+  try {
+    return hashBytes(fs.readFileSync(abs));
+  } catch (_) {
+    return null;
+  }
 }
 
 /** Hash each rel that exists on disk under ompDir → { rel: hash }. */
@@ -33,9 +36,10 @@ function hashInstalled(ompDir, rels) {
   return out;
 }
 
-function copyOne(ompDir, rel, srcAbs) {
-  const dest = assertDest(ompDir, rel);
-  copyEntry({ src: srcAbs, dest, kind: 'file' });
+function copyOne(ompDir, entry) {
+  const dest = assertDest(ompDir, entry.rel);
+  if (entry.content) writeAtomic(dest, entry.content);
+  else copyEntry({ src: entry.srcAbs, dest, kind: "file" });
 }
 
 // Delete only if the on-disk hash still equals `expected`. Returns 'deleted',
@@ -43,28 +47,13 @@ function copyOne(ompDir, rel, srcAbs) {
 function integrityDelete(ompDir, rel, expected) {
   const dest = assertDest(ompDir, rel);
   const cur = onDiskHash(dest);
-  if (cur === null) return 'absent';
-  if (cur !== expected) return 'kept';
+  if (cur === null) return "absent";
+  if (cur !== expected) return "kept";
   fs.unlinkSync(dest);
-  return 'deleted';
+  return "deleted";
 }
 
-// rmdir now-empty ancestor dirs of the given rels, deepest first, stopping at
-// (and never removing) the `.omp/` root.
-function sweepEmptyDirs(ompDir, rels) {
-  const root = path.resolve(ompDir);
-  const dirs = new Set();
-  for (const rel of rels) {
-    let d = path.dirname(rel);
-    while (d && d !== '.' && d !== '/') { dirs.add(d); d = path.dirname(d); }
-  }
-  for (const rel of [...dirs].sort((a, b) => b.length - a.length)) {
-    const abs = path.resolve(root, rel);
-    if (abs === root) continue;
-    try { assertDest(ompDir, rel); } catch (_) { continue; }
-    try { if (fs.readdirSync(abs).length === 0) fs.rmdirSync(abs); } catch (_) { /* non-empty or gone */ }
-  }
-}
+const { sweepEmptyDirs } = require("./omp-install-sweep");
 
 // Recover `.aku-tmp.*` staging entries a crash stranded between write and rename
 // in a PRIOR run: tmpFor() embeds the pid, so a new run's own-name cleanup never
@@ -73,16 +62,24 @@ function sweepEmptyDirs(ompDir, rels) {
 // the directories this plan touches is safe — no foreign-dir / concurrency hazard.
 function sweepStaleTmps(ompDir, rels) {
   const root = path.resolve(ompDir);
-  const dirs = new Set(['.']);
+  const dirs = new Set(["."]);
   for (const rel of rels) dirs.add(path.dirname(rel));
   for (const dirRel of dirs) {
-    const abs = dirRel === '.' ? root : path.resolve(root, dirRel);
-    if (abs !== root && path.relative(root, abs).startsWith('..')) continue;
+    const abs = dirRel === "." ? root : path.resolve(root, dirRel);
+    if (abs !== root && path.relative(root, abs).startsWith("..")) continue;
     let entries;
-    try { entries = fs.readdirSync(abs); } catch (_) { continue; }
+    try {
+      entries = fs.readdirSync(abs);
+    } catch (_) {
+      continue;
+    }
     for (const name of entries) {
       if (name.startsWith(TMP_PREFIX)) {
-        try { fs.rmSync(path.join(abs, name), { recursive: true, force: true }); } catch (_) { /* ignore */ }
+        try {
+          fs.rmSync(path.join(abs, name), { recursive: true, force: true });
+        } catch (_) {
+          /* ignore */
+        }
       }
     }
   }
@@ -94,24 +91,50 @@ function sweepStaleTmps(ompDir, rels) {
  * what changed plus the conflicts that were kept (for reporting).
  */
 function applyPlan(ompDir, plan, { force = false } = {}) {
-  const sum = { created: [], updated: [], recreated: [], pruned: [], kept: [], conflicts: [] };
+  const sum = {
+    created: [],
+    updated: [],
+    recreated: [],
+    pruned: [],
+    kept: [],
+    conflicts: [],
+  };
   const removed = [];
-  const allRels = [...plan.creates, ...plan.updates, ...plan.recreates, ...plan.prunes, ...plan.conflicts].map((e) => e.rel);
+  const allRels = [
+    ...plan.creates,
+    ...plan.updates,
+    ...plan.recreates,
+    ...plan.prunes,
+    ...plan.conflicts,
+  ].map((e) => e.rel);
   sweepStaleTmps(ompDir, allRels);
-  for (const [bucket, key] of [['creates', 'created'], ['updates', 'updated'], ['recreates', 'recreated']]) {
-    for (const e of plan[bucket]) { copyOne(ompDir, e.rel, e.srcAbs); sum[key].push(e.rel); }
+  for (const [bucket, key] of [
+    ["creates", "created"],
+    ["updates", "updated"],
+    ["recreates", "recreated"],
+  ]) {
+    for (const e of plan[bucket]) {
+      copyOne(ompDir, e);
+      sum[key].push(e.rel);
+    }
   }
   for (const p of plan.prunes) {
     const r = integrityDelete(ompDir, p.rel, p.recordedHash);
-    if (r === 'deleted') { sum.pruned.push(p.rel); removed.push(p.rel); }
-    else if (r === 'kept') sum.kept.push(p.rel);
+    if (r === "deleted") {
+      sum.pruned.push(p.rel);
+      removed.push(p.rel);
+    } else if (r === "kept") sum.kept.push(p.rel);
   }
   for (const c of plan.conflicts) {
-    if (force && !c.orphaned && c.srcAbs) { copyOne(ompDir, c.rel, c.srcAbs); sum.updated.push(c.rel); }
-    else if (force && c.orphaned) {
+    if (force && !c.orphaned && (c.srcAbs || c.content)) {
+      copyOne(ompDir, c);
+      sum.updated.push(c.rel);
+    } else if (force && c.orphaned) {
       const r = integrityDelete(ompDir, c.rel, c.installedHash);
-      if (r === 'deleted') { sum.pruned.push(c.rel); removed.push(c.rel); }
-      else if (r === 'kept') sum.kept.push(c.rel);
+      if (r === "deleted") {
+        sum.pruned.push(c.rel);
+        removed.push(c.rel);
+      } else if (r === "kept") sum.kept.push(c.rel);
     } else {
       sum.conflicts.push(c.rel);
     }
@@ -125,7 +148,12 @@ function applyPlan(ompDir, plan, { force = false } = {}) {
  * Drifted paths and legacy orphan-marked hashes are kept unless force explicitly
  * accepts that untrusted baseline. User files outside the lock are untouched.
  */
-function uninstall(ompDir, prior, lockName, { force = false, dryRun = false } = {}) {
+function uninstall(
+  ompDir,
+  prior,
+  lockName,
+  { force = false, dryRun = false } = {},
+) {
   const sum = { removed: [], kept: [], absent: [] };
   const files = (prior && prior.files) || {};
   for (const rel of Object.keys(files)) {
@@ -138,17 +166,32 @@ function uninstall(ompDir, prior, lockName, { force = false, dryRun = false } = 
       continue;
     }
     if (entry.orphaned === true && !force) {
-      (onDiskHash(assertDest(ompDir, rel)) === null ? sum.absent : sum.kept).push(rel);
+      (onDiskHash(assertDest(ompDir, rel)) === null
+        ? sum.absent
+        : sum.kept
+      ).push(rel);
       continue;
     }
     const r = integrityDelete(ompDir, rel, entry.hash);
-    sum[r === 'deleted' ? 'removed' : r].push(rel);
+    sum[r === "deleted" ? "removed" : r].push(rel);
   }
   if (!dryRun) {
     sweepEmptyDirs(ompDir, sum.removed);
-    try { fs.unlinkSync(path.join(ompDir, lockName)); } catch (_) { /* already gone */ }
+    try {
+      fs.unlinkSync(path.join(ompDir, lockName));
+    } catch (_) {
+      /* already gone */
+    }
   }
   return sum;
 }
 
-module.exports = { onDiskHash, hashInstalled, integrityDelete, sweepEmptyDirs, sweepStaleTmps, applyPlan, uninstall };
+module.exports = {
+  onDiskHash,
+  hashInstalled,
+  integrityDelete,
+  sweepEmptyDirs,
+  sweepStaleTmps,
+  applyPlan,
+  uninstall,
+};

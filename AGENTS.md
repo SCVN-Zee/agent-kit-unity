@@ -4,9 +4,9 @@ This file provides guidance to coding agents working with this repository.
 
 ## Role
 
-This repo is a **standalone, MCP-agnostic, convention-only Unity kit**, shipped as an **Oh My Pi (OMP) project-scoped kit**. It teaches **Unity conventions** (naming, structure, asset layout) and ships focused convention and review skills, with **no specialist agents**. Editor workflows and tool selection belong to the agent; the kit hard-codes no server name and auto-registers nothing. Because it installs into a repo's `.omp/`, it activates only in that repo and stays silent everywhere else — no detection hooks needed.
+This repo is a **standalone, MCP-agnostic Unity conventions and reference-feature kit**, shipped as an **OMP, Pi, Codex, or Claude Code project-scoped kit**. It teaches **Unity conventions** (naming, structure, asset layout), ships focused review skills and an opt-in reference-feature workflow, with **no specialist agents**. Editor tool selection belongs to the agent; the kit hard-codes no server name and auto-registers nothing. It uses project-local discovery paths, with no detection hooks. Codex uses the shared `.agents/skills/` surface and a bounded root `AGENTS.md` section; file ownership is independent, not a guarantee of host-exclusive visibility.
 
-> The globally-installed Claude Code / Codex builds (hooks, `~/.claude`, `~/.codex`) are **retired**. There is one build: the project-scoped OMP kit under `omp/`, installed with `ship-omp`.
+> The globally-installed Claude Code / Codex builds (hooks, `~/.claude`, `~/.codex`) are **retired**. There is one content source under `kit/`, installed with `ship-kit --target omp|pi|codex|claude` (default OMP). Native projections are generated, not separately maintained content trees.
 
 ## Dual invocation surface
 
@@ -21,18 +21,22 @@ Kit content cites **bare kebab capability ids in backticks** (`scene-open`, `scr
 
 - The kit is **standalone** and ships Unity handling only; non-Unity work stays with the host agent runtime.
 - It supplies Unity-only knowledge via `aku-*` namespaced files across skills and rules.
-- `scripts/ship-omp.cjs` copies the packaged `omp/` into a target repo's `.omp/`, records a checksum lock, and reconciles updates against user edits — it never touches paths the lock does not record.
+- `scripts/ship-kit.cjs` selects native host paths, records independent target locks, and reconciles updates against user edits. Existing unrelated files remain unowned.
+- Pi projection and startup/conflict semantics live in `scripts/lib/pi-install-payload.js` and `pi-install-safety.js`; see `README.md` and `kit-guide.html#runtime`. Do not add hand-maintained duplicate skills. Pi markers use `.pi/aku-project.json` without OMP fallback.
+
+- Codex/Claude projection and lifecycle live in `scripts/lib/host-*.js`; see `README.md` and `kit-guide.html#runtime`. Locks use explicit repository-relative allowlists and a separate Codex startup-span record. Never widen the legacy apply root to the repository. Unowned identical bytes require explicit adoption; incomplete uninstall retains edited-entry records and exits 2. No force option deletes the whole root `AGENTS.md` or bypasses structural safety.
 
 ## Layout
 
 ```
-omp/                       # The shipped kit (copied into a repo's .omp/)
+kit/                       # Shared source; copied to OMP or projected to native hosts
   AGENTS.md                # project background + tier-detection instructions
   rules/                   # aku-core-rules.md (sticky engine conventions + serialize) + on-demand rulebooks
   skills/aku-*/            # focused Unity skills (SKILL.md + subfiles)
   tiers/<tier>/{rules,skills}/  # tier overlays copied in for matching repos (supercent, luna)
 scripts/
-  ship-omp.cjs             # install / --check / --update / --uninstall / --dry-run into <repo>/.omp
+  ship-kit.cjs             # shared installer: --target omp|pi|codex|claude
+  ship-omp.cjs             # compatibility wrapper for existing commands
   lib/
     omp-install-lock.js      # .omp/aku-lock.json read/write (atomic, corrupt/version-gated, per-entry hashes)
     omp-install-payload.js   # byte-oriented enumerator: base + tiers → per-file raw SHA-256
@@ -42,6 +46,7 @@ scripts/
     global-install-fs.js     # writeAtomic + copy/remove/tmp-sweep, symlink-safe
     path-safety.js           # assertSafePath / isWithin / assertRootNotSymlink containment guards
     docs-facts.js            # derive component inventory + counts from source (docs-counts authority)
+    host-*.js                # bounded Codex/Claude projection, ownership, startup and lifecycle
   tests/                   # node --test suite for scripts
 test/                      # Luna build-settings validator suite
 references/                # vendored Unity-MCP plugin + extension repos (gitignored from CI)
@@ -50,9 +55,9 @@ Makefile                   # OMP install/update/verify (make help | update | dry
 
 ## Critical rules for contributors
 
-- **Single namespace**: every shipped file under `omp/{skills,rules}` and every tier overlay under `omp/tiers/<tier>/{rules,skills}` is named `aku-*`; the Supercent tier spells it `aku-sc-*`, the Luna tier `aku-luna-*`. `unity-*` is retired precisely because it collides with plausible user file names — the kit must never own a prefix a user would pick. Enforced by `scripts/tests/shipped-namespace.test.cjs`.
+- **Single namespace**: every shipped file under `kit/{skills,rules}` and every tier overlay under `kit/tiers/<tier>/{rules,skills}` is named `aku-*`; the Supercent tier spells it `aku-sc-*`, the Luna tier `aku-luna-*`. `unity-*` is retired precisely because it collides with plausible user file names — the kit must never own a prefix a user would pick. Enforced by `scripts/tests/shipped-namespace.test.cjs`.
 - **Never blanket-rename `unity-`.** `Unity-MCP` (the vendored research plugin under gitignored `references/`), `agent-kit-unity`, and the user-file example `unity-house-style.md` all legitimately keep `unity` — a namespace sweep that touches them corrupts foreign or user files.
-- **The lock is untrusted destructive input.** `ship-omp` deletes a path only when its on-disk raw-byte hash still equals the hash the lock recorded (the destructive-integrity gate) — a user-edited or foreign file is kept as a conflict, never clobbered, unless `--force`. It refuses a symlinked `.omp/` root (writes could redirect outside the repo) and never `rmdir`s the root itself: `path.relative(root, root)` is `''`, so a `.` entry must never resolve to the root.
+- **The lock is untrusted destructive input.** `ship-kit` deletes a path only when its on-disk raw-byte hash still equals the hash the lock recorded (the destructive-integrity gate) — a user-edited or foreign file is kept as a conflict, never clobbered, unless `--force`. It refuses a symlinked `.omp/` root (writes could redirect outside the repo) and never `rmdir`s the root itself: `path.relative(root, root)` is `''`, so a `.` entry must never resolve to the root.
 - **Drift is content, not version.** The lock stamps `kitVersion` from `package.json` for provenance only; `--check`/`--update` decide staleness by comparing raw-byte hashes, so a committed `.omp/aku-lock.json` never churns and a re-run on unchanged source+target is a byte-identical no-op. `installedAt` is preserved; `updatedAt` bumps only on an actual change.
 - **Byte-oriented payload.** `omp-install-payload.js` hashes **raw file bytes** — it must not route non-`.md` skill subfiles through the markdown walker (which decodes UTF-8 and would miss binary/exact-byte content). README/tier metadata are excluded from the payload.
 - **Version source is `package.json`.** Nothing reads or writes a `metadata.json`; that file and its stamp step are gone.
@@ -71,7 +76,8 @@ Makefile                   # OMP install/update/verify (make help | update | dry
 Machine gates are `lint:loc`, `lint:frontmatter`, `lint:docs-counts`, and the full `scripts/tests/` + `test/` suites — all exit 0 through `make check`. Release tests additionally build the real archive, serve it over local HTTP, run the generated bootstrap, verify idempotency and conflict preservation, and prove checksum failure occurs before target mutation.
 
 ## Releases
-- **Fast path:** `make bump VERSION=<version>` (leading `v` optional) requires `VERSION` to satisfy the exact `scripts/build-release.cjs` channel rule; no changelog section is required — update `CHANGELOG.md` manually when there is something to note, and an edited changelog rides in the release commit. The target then bumps `package.json`/`package-lock.json`, reruns `make check`, commits `chore(release): v<version>` (changelog + version files) and creates annotated tag `v<version>`. README commands follow the latest stable release and are neither rewritten nor included in the release commit by the bump target; beta installs use an explicitly pinned URL. Push with `git push --atomic origin <branch> v<version>`.
+
+- **Fast path:** `make bump VERSION=<version>` (leading `v` optional) requires `VERSION` to satisfy the exact `scripts/build-release.cjs` channel rule; no changelog section is required — update `CHANGELOG.md` manually when there is something to note, and an edited changelog rides in the release commit. The target then bumps `package.json`/`package-lock.json`, reruns `make check`, commits `chore(release): v<version>` (changelog + version files) and creates annotated tag `v<version>`. README commands follow the latest stable release and are neither rewritten nor included in the release commit by the bump target. Beta installs need no pinned URL either: the generated `install.sh` resolves `--channel beta` locally (highest published `X.Y.Z-beta.N`, digest-verified bootstrap, no fallback to stable), so both channels ship from the same immutable versioned releases and both publishers stay unchanged. Push with `git push --atomic origin <branch> v<version>`.
 - **Canonical repository:** `SCVN-Zee/agent-kit-unity`. ClaudeKit is historical inspiration only, never the package owner, release URL, or distribution identity.
 - **Exactly two channels:** stable tags `vX.Y.Z`; beta tags `vX.Y.Z-beta.N`. RC and generic prerelease tags are unsupported.
 - **Tag/version lockstep:** the pushed tag must equal `v` plus the exact version in both `package.json` and `package-lock.json`.
@@ -81,8 +87,8 @@ Machine gates are `lint:loc`, `lint:frontmatter`, `lint:docs-counts`, and the fu
 ## Workflow
 
 When implementing changes inside this repo:
+
 - Read the active plan under `plans/` (the latest `<timestamp>-*/plan.md`) and the relevant `phase-XX-*.md` for context.
 - Update `CHANGELOG.md` manually and use a conventional commit type (`feat:`, `fix:`, `docs:`, and so on). `package.json` is the version source of truth.
-- After any installer/rule/skill change, run `make check`, then `make update TARGET_DIR=<unity-repo>` (or `node scripts/ship-omp.cjs <repo>`) to refresh a real install and confirm every path the lock names resolves.
+- After any installer/rule/skill change, run `make check`, then `make update TARGET_DIR=<unity-repo>` (or `node scripts/ship-kit.cjs <repo>`) to refresh a real install and confirm every path the lock names resolves.
 - **`TARGET_DIR` is a make VARIABLE, not a flag** (default `.`).
-

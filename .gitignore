@@ -3,6 +3,9 @@ node_modules/
 .pnp
 .pnp.*
 
+# local working documentation
+/docs/
+
 # build/output
 /dist
 /build

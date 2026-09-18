@@ -26,6 +26,93 @@ trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+select_channel() {
+  node - "$REPOSITORY" "$TMP_DIR" "$@" <<'CHANNEL_RESOLVER'
+const fs = require('node:fs');
+const path = require('node:path');
+const { createHash } = require('node:crypto');
+const { spawnSync } = require('node:child_process');
+const [repository, temp, ...input] = process.argv.slice(2);
+@@CHANNEL_PATTERNS@@
+
+async function main() {
+  let channel;
+  const args = [];
+  for (let i = 0; i < input.length; i++) {
+    if (input[i] !== '--channel') { args.push(input[i]); continue; }
+    if (channel !== undefined) throw Error('--channel may be supplied only once');
+    channel = input[++i];
+    if (channel !== 'stable' && channel !== 'beta') {
+      throw Error('--channel requires stable or beta');
+    }
+  }
+  const api = process.env.AKU_RELEASE_API_URL || 'https://api.github.com/repos/' + repository + '/releases';
+  async function json(suffix) {
+    const response = await fetch(api + suffix, {
+      headers: { Accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(30000)
+    });
+    if (!response.ok) throw Error('release API HTTP ' + response.status);
+    return response.json();
+  }
+  function eligible(release) {
+    if (!release || typeof release.tag_name !== 'string' || typeof release.draft !== 'boolean' ||
+        typeof release.prerelease !== 'boolean') throw Error('invalid release API response');
+    return !release.draft && release.prerelease === (channel === 'beta') &&
+      typeof release.published_at === 'string' && release.tag_name.startsWith('v') &&
+      patterns[channel].test(release.tag_name.slice(1));
+  }
+  let selected;
+  if (channel === 'stable') {
+    selected = await json('/latest');
+    if (!eligible(selected)) throw Error('no published stable release available');
+  } else {
+    let highest;
+    for (let page = 1; ; page++) {
+      const releases = await json('?per_page=100&page=' + page);
+      if (!Array.isArray(releases)) throw Error('invalid release list response');
+      for (const release of releases) {
+        if (!eligible(release)) continue;
+        const version = release.tag_name.slice(1).replace('-beta.', '.').split('.').map(BigInt);
+        const difference = highest ? version.findIndex((value, i) => value !== highest[i]) : -1;
+        if (!highest || (difference >= 0 && version[difference] > highest[difference])) {
+          selected = release;
+          highest = version;
+        }
+      }
+      if (releases.length < 100) break;
+    }
+    if (!selected) throw Error('no published beta release available');
+  }
+  const assets = Array.isArray(selected.assets) ? selected.assets.filter(asset => asset && asset.name === 'install.sh') : [];
+  if (assets.length !== 1 || !/^sha256:[a-f0-9]{64}$/.test(assets[0].digest)) {
+    throw Error('selected release is missing a verified install.sh asset');
+  }
+  const base = process.env.AKU_RELEASE_BASE_URL ||
+    'https://github.com/' + repository + '/releases/download/' + selected.tag_name;
+  const response = await fetch(base + '/install.sh', { signal: AbortSignal.timeout(30000) });
+  if (!response.ok) throw Error('selected installer HTTP ' + response.status);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  const digest = 'sha256:' + createHash('sha256').update(bytes).digest('hex');
+  if (digest !== assets[0].digest) throw Error('selected installer checksum mismatch');
+  const installer = path.join(temp, 'selected-install.sh');
+  fs.writeFileSync(installer, bytes);
+  console.error('install.sh: selected ' + channel + ' ' + selected.tag_name);
+  const result = spawnSync('sh', [installer, ...args], { stdio: 'inherit' });
+  if (result.error) throw result.error;
+  process.exitCode = result.status === null ? 1 : result.status;
+}
+main().catch(error => { console.error('install.sh: ' + error.message); process.exitCode = 1; });
+CHANNEL_RESOLVER
+}
+
+for arg do
+  if [ "$arg" = '--channel' ]; then
+    select_channel "$@"
+    exit $?
+  fi
+done
+
+
 curl -fsSL --retry 3 --retry-connrefused "$BASE_URL/$ARCHIVE" -o "$TMP_DIR/$ARCHIVE"
 ACTUAL_SHA256="$(node -e "const fs=require('fs'),c=require('crypto');process.stdout.write(c.createHash('sha256').update(fs.readFileSync(process.argv[1])).digest('hex'))" "$TMP_DIR/$ARCHIVE")"
 if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
@@ -35,4 +122,4 @@ fi
 
 mkdir "$TMP_DIR/unpacked"
 tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR/unpacked"
-node "$TMP_DIR/unpacked/package/scripts/ship-omp.cjs" "$@"
+node "$TMP_DIR/unpacked/package/scripts/ship-kit.cjs" "$@"
