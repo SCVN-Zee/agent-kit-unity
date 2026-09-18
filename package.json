@@ -1,6 +1,6 @@
 {
   "name": "agent-kit-unity",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "MCP-agnostic Unity conventions and reference-feature kit for project-scoped OMP, Pi, Codex, and Claude Code installs. One shared source supplies Unity skills, rules, and optional Supercent/Luna tiers without registering MCP servers or global hooks.",
   "scripts": {
     "test": "npm run test:scripts && node --test test/*.test.cjs",
