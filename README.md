@@ -15,13 +15,7 @@ curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/
 
 This installs the latest stable release for **OMP**. To choose another host, append `-s -- --target pi` to `sh`; valid targets are `omp`, `pi`, `codex`, and `claude`.
 
-**New target support requires a release containing it.** If the published installer lacks your target, run from this kit checkout instead:
-
-```sh
-node scripts/ship-kit.cjs /path/to/unity-project --target pi
-```
-
-Replace `pi` with your host. Each target has independent ownership:
+**New target support requires a release containing it.** Each target has independent ownership:
 
 | Target | Skills | Startup guidance |
 | --- | --- | --- |
@@ -46,7 +40,7 @@ Pi's project append file takes precedence over its global append file. Codex pre
 
 Connect your preferred Unity MCP for Editor operations. The kit uses whichever capabilities are available; it registers none.
 
-## 3. Update or remove
+## 3. Update
 
 Use the **same target every time**; omitting it selects OMP. Example for Pi:
 
@@ -55,9 +49,20 @@ set -o pipefail
 curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --target pi --update
 ```
 
-Replace `--update` with `--check` to check drift, `--dry-run` to preview, or `--uninstall` to remove the kit. From a checkout, use the same flags with `node scripts/ship-kit.cjs /path/to/unity-project`.
+Replace `--update` with `--check` to check drift or `--dry-run` to preview. `--check` exits 2 for drift.
 
-Edited files are preserved as conflicts. Back up and resolve them before retrying; use `--force` only to deliberately adopt or replace conflicting content. Unsafe paths and symlinks remain blocked. `--check` exits 2 for drift; incomplete Codex/Claude uninstall also exits 2 and retains edited files and ownership records.
+Edited files are preserved as conflicts. Back up and resolve them before retrying; use `--force` only to deliberately adopt or replace conflicting content. Unsafe paths and symlinks remain blocked.
+
+## 4. Uninstall
+
+Run from your Unity project root with the target you installed. Example for Pi:
+
+```sh
+set -o pipefail
+curl -fsSL https://github.com/SCVN-Zee/agent-kit-unity/releases/latest/download/install.sh | sh -s -- --target pi --uninstall
+```
+
+Replace `pi` with your host. Edited files are preserved as conflicts. Incomplete Codex/Claude uninstall exits 2 and retains edited files and ownership records.
 
 ## Optional settings
 
@@ -67,6 +72,6 @@ Edited files are preserved as conflicts. Back up and resolve them before retryin
 
 ## Contribute
 
-Edit shared content in `kit/`, then run `make check`. See [AGENTS.md](AGENTS.md) for contributor and release rules. `docs/` stays local-only and Git-ignored.
+Edit shared content in `kit/`, then run `make check`. See [AGENTS.md](AGENTS.md) for contributor and release rules.
 
 [MIT License](LICENSE)

@@ -29,7 +29,7 @@ All notable changes to this project are documented in this file. Maintainers upd
 
 ### Changed
 
-- **Simpler documentation.** README is now a short install/use/update tutorial. The visual guide lives at root with repaired source links; `docs/` is ignored and its host guides remain local-only.
+- **Simpler documentation.** README is now a short curl-based install/use/update/uninstall tutorial with separate update and uninstall sections and no checkout installer commands or local-only docs note. The visual guide lives at root with repaired source links.
 - **Shared source named `kit/`.** Renamed the source directory from `omp/` to `kit/` and introduced canonical `ship-kit.cjs` / `aku-ship-kit` entrypoints. `ship-omp.cjs` and `aku-ship-omp` remain compatibility aliases. Installed `.omp/` and `.pi/` paths, target flags, lock identity, and payload bytes are unchanged. Packaging, bootstrap, lint roots, and test fixtures now use `kit/`.
 - **Latest-stable README commands.** Install, check, preview, update, and uninstall commands now use the permanent `releases/latest/download/install.sh` URL, including the explicit Supercent-tier example. Version-pinned URLs remain documented for reproducible and beta installs. `make bump` no longer requires or rewrites pinned README URLs.
 - **Changelog no longer gates `make bump`.** The release-prep target no longer requires a `## [<version>]` `CHANGELOG.md` section; the `scripts/build-release.cjs` channel-rule gate and the downstream bump → `make check` → release commit/tag flow remain, and an edited changelog still rides in the release commit.
